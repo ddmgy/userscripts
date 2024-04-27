@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Danbooru Show Profile Changes
 // @namespace    https://github.com/ddmgy/userscripts
-// @version      0.1.0
+// @version      0.1.1
 // @description  Show changes to your Danbooru profile page
 // @author       ddmgy
 // @match        *://*.donmai.us/profile
@@ -107,6 +107,18 @@ const classNames = [
 
 for (const { index, className } of classNames) {
   $(`tr:nth-of-type(${index})`).addClass(className);
+}
+
+function __getClass(value) {
+  return value === 0 ? "neutral" : (value > 0 ? "positive" : "negative");
+}
+
+function __makeSup(value, title) {
+  return `
+    <sup class="dspc-${__getClass(value)}" title="${title === undefined ? "" : title}">
+      ${value}
+    </sup>
+  `;
 }
 
 /*
@@ -218,8 +230,12 @@ const infos = [
     render: (el, oldValue, newValue, diff) => {
       const allUrl = $(el).attr("href");
 
-      const getClass = (value) => value === 0 ? "neutral" : (value > 0 ? "positive" : "negative");
-      const link = (key) => `<a href="${allUrl}&search%5Bcategory%5D=${key}" title="${oldValue[key]}">${key}:${newValue[key]}<sup class="dspc-${getClass(diff[key])}">${diff[key]}</sup></a>`;
+      const link = (key) => `
+        <a href="${allUrl}&search%5Bcategory%5D=${key}" title="${oldValue[key]}">
+          ${key}:${newValue[key]}
+          ${__makeSup(diff[key])}
+        </a>
+      `;
 
       $(el).replaceWith(`
         <div>
@@ -232,7 +248,6 @@ const infos = [
     },
   },
 ];
-
 
 async function processInfo({ key, selector, extractor = Extractor.number, compare = Compare.numbers, render }) {
   const stored = JSON.parse(window.localStorage.getItem(`dspc-${key}`));
@@ -255,8 +270,7 @@ async function processInfo({ key, selector, extractor = Extractor.number, compar
     if (render !== undefined) {
       render(element, stored, extracted, diff);
     } else {
-      const className = diff === 0 ? "neutral" : (diff > 0 ? "positive" : "negative");
-      $(element).after(`<sup class="dspc-${className}" title="${stored}">${diff}</sup>`);
+      $(element).after(__makeSup(diff, stored))
     }
   }
 
