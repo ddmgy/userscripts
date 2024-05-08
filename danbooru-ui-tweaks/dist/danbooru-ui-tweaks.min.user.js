@@ -1,0 +1,14 @@
+// ==UserScript==
+// @name        danbooru-ui-tweaks
+// @version     0.1.0
+// @description Tweaks to the Danbooru interface
+// @author      ddmgy
+// @namespace   ddmgy
+// @match       *://*.donmai.us/posts/*
+// @exclude     /^https?://\w+\.donmai\.us/posts/.*\.(xml|json|atom)(\?|$)/
+// @grant       none
+// @downloadURL https://github.com/ddmgy/userscripts/blob/master/danbooru-ui-tweaks/dist/danbooru-ui-tweaks.min.user.js?raw=true
+// @updateURL   https://github.com/ddmgy/userscripts/blob/master/danbooru-ui-tweaks/dist/danbooru-ui-tweaks.min.user.js?raw=true
+// ==/UserScript==
+
+"use strict";(()=>{function a({headerSelector:t,tagSelector:e}){let o=$(`h3.${t}-tag-list`);if(o.length===0){console.log(`[danbooru-ui-tweaks] h3.${t}-tag-list does not exist, skipping`);return}$(o).append($("<span></span>",{class:"post-count",text:$(`.tag-type-${e}`).length,style:"font-weight: normal"}))}function n(){let t=[{headerSelector:"artist",tagSelector:"1"},{headerSelector:"copyright",tagSelector:"3"},{headerSelector:"character",tagSelector:"4"},{headerSelector:"general",tagSelector:"0"},{headerSelector:"meta",tagSelector:"5"}];for(let e of t)a(e)}$(n);})();
