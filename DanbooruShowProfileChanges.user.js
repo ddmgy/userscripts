@@ -20,7 +20,6 @@ if (userId === null || userName === null) {
   return;
 }
 
-const userIdMatch = /\/users\/(\d+)\/?/.exec(window.location.pathname);
 if (userName !== $("a.user").text()) {
   return;
 }
@@ -125,7 +124,8 @@ function __makeSup(value, title) {
  * new info processing
  * key: identifying string, to store data
  * selector: used to select element
- * compare: get diff between previous and extracted values
+ * extractor: used to extract data from element
+ * compare: get diff between stored and extracted values
  * render: function (element, old, new, diff) to create element to show changes
 */
 const infos = [

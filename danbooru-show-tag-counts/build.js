@@ -18,7 +18,6 @@ async function buildMain() {
   const sharedOptions = {
     entryPoints: ["src/index.ts"],
     bundle: true,
-    banner: { js: meta },
   };
 
   if (isDev) {

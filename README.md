@@ -23,11 +23,12 @@ Keep track of information on user profile, and displays the changes each time yo
 
 Add panzoom to posts on Danbooru, just like the [media asset panzoom userscript by hdk5](https://github.com/hdk5/danbooru.user.js/blob/master/dist/mediaasset-panzoom.user.js).
 
-## Danbooru UI Tweaks
+## Danbooru - Show Tag Counts
 
-[Install](https://github.com/ddmgy/userscripts/blob/master/danbooru-ui-tweaks/dist/danbooru-ui-tweaks.user.js?raw=true)
+[Install](https://github.com/ddmgy/userscripts/blob/master/danbooru-show-tag-counts/dist/danbooru-show-tag-counts.user.js?raw=true)
 
-[Minified](https://github.com/ddmgy/userscripts/blob/master/danbooru-ui-tweaks/dist/danbooru-ui-tweaks.min.user.js?raw=true)
+[Minified](https://github.com/ddmgy/userscripts/blob/master/danbooru-show-tag-counts/dist/danbooru-show-tag-counts.min.user.js?raw=true)
 
-Tweaks to the Danbooru interface:
-* Show tag counts on posts
+Show tag counts on Danbooru posts.
+
+![An example of the tag counts](images/danbooru-show-tag-counts.png)
