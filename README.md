@@ -15,7 +15,9 @@ Adds a page selector to any page on Danbooru that has a paginator. Input a numbe
 
 ## Danbooru Show Profile Changes
 
-[Install](https://raw.githubusercontent.com/ddmgy/userscripts/master/DanbooruShowProfileChanges.user.js)
+[Install](https://github.com/ddmgy/userscripts/blob/master/danbooru-show-profile-changes/dist/danbooru-show-profile-changes.user.js?raw=true)
+
+[Minified](https://github.com/ddmgy/userscripts/blob/master/danbooru-show-profile-changes/dist/danbooru-show-profile-changes.min.user.js?raw=true)
 
 Keep track of information on user profile, and displays the changes each time you reload the page.
 

@@ -1,0 +1,22 @@
+{
+  "name": "danbooru-show-profile-changes",
+  "version": "0.1.1",
+  "author": "ddmgy",
+  "description": "Show changes to your Danbooru profile page",
+  "license": "MIT",
+  "scripts": {
+    "build": "node build.js build",
+    "dev": "node build.js dev",
+    "clean": "rm -rf dist"
+  },
+  "private": true,
+  "dependencies": {
+    "jquery": "^3.7.1"
+  },
+  "devDependencies": {
+    "@types/jquery": "^3.5.30",
+    "@types/node": "^20.12.11",
+    "esbuild": "^0.21.1",
+    "typescript": "^5.4.5"
+  }
+}
