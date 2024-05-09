@@ -204,7 +204,8 @@ class ShowProfileChanges {
           negative: +match[3],
         };
       },
-      compare: Comparator.objects,
+      // @ts-expect-error
+      comparator: Comparator.objects,
       // @ts-expect-error
       render: (el: JQuery, oldValue: Record<string, number>, newValue: Record<string, number>, diff: Record<string, number>) => {
         const allUrl = $(el).attr("href");

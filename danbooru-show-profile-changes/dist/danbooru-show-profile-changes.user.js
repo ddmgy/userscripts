@@ -200,7 +200,8 @@
             negative: +match[3]
           };
         },
-        compare: Comparator.objects,
+        // @ts-expect-error
+        comparator: Comparator.objects,
         // @ts-expect-error
         render: (el, oldValue, newValue, diff) => {
           const allUrl = $(el).attr("href");
