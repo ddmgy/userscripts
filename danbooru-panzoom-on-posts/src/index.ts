@@ -1,17 +1,7 @@
-// ==UserScript==
-// @name        Danbooru - Panzoom on Posts
-// @namespace   https://github.com/ddmgy/userscripts
-// @description Add panzoom to image in posts
-// @version     0.1.0
-// @author      ddmgy
-// @match       https://danbooru.donmai.us/posts/*
-// @grant       none
-// @require     https://unpkg.com/panzoom@^9.4.0/dist/panzoom.min.js
-// ==/UserScript==
-
-function __insertStyle(css) {
-  if (!css) { return; }
-  if (typeof window === "undefined") { return; }
+function __insertStyle(css: string) {
+  if (css === "" || typeof window === "undefined") {
+    return;
+  }
 
   const style = document.createElement("style");
   style.setAttribute("type", "text/css");
@@ -23,29 +13,34 @@ __insertStyle(`
 .image-container:not(:hover) .image-zoom-level {
   opacity: 0;
 }
-
 .image-zoom-level {
   color: var(--preview-icon-color);
   background: var(--preview-icon-background);
 }
 `);
 
-
 /* Shamelessly modelled after the [media asset panzoom userscript by hdk5](https://github.com/hdk5/danbooru.user.js/blob/master/dist/mediaasset-panzoom.user.js) */
-class ImagePanzoom {
+class PanzoomOnPosts {
   static initialize() {
-    $("img#image").each((i, el) => {
+    $("img#image").each((_, el) => {
       if (el.hasAttribute("ex-panzoom-on-posts")) {
         return;
       }
 
       el.setAttribute("ex-panzoom-on-posts", "");
 
-      new ImagePanzoom(el);
-    });
+      new PanzoomOnPosts(el);
+    })
   }
 
-  constructor(element) {
+  $component: JQuery;
+  $container: JQuery;
+  $zoomLevels: JQuery[];
+  $panzoom: JQuery;
+  $image: JQuery;
+  panzoom: any;
+
+  constructor(element: HTMLElement) {
     this.$component = $("<div>", { "class": "image-component" });
     this.$component.css({
       "top": "1rem",
@@ -75,7 +70,7 @@ class ImagePanzoom {
         "cursor": "pointer",
         "pointer-events": "all",
       });
-      el.on("click", (e) => this.fit());
+      el.on("click", (e: Event) => this.fit());
       this.$zoomLevels.push(el);
     }
 
@@ -105,9 +100,10 @@ class ImagePanzoom {
       "max-width": "100%",
     });
 
+    // @ts-ignore
     this.panzoom = panzoom(this.$panzoom.get(0), {
       zoomDoubleClickSpeed: 1,
-      onDoubleClick: (e) => {
+      onDoubleClick: (e: Event) => {
         this.fit();
         return false;
       },
@@ -118,6 +114,7 @@ class ImagePanzoom {
     this.updateZoom();
     this.panzoom.on("zoom", () => this.updateZoom());
 
+    // @ts-ignore
     new ResizeObserver(() => this.updateZoom()).observe(this.$image.get(0));
   }
 
@@ -127,22 +124,24 @@ class ImagePanzoom {
   }
 
   updateZoom() {
-    const text = `${Math.round(100 * this.zoomLevel)}%`;
+    const zoomLevel = this.zoomLevel;
+    const text = `${Math.round(100 * zoomLevel)}%`;
 
     for (const el of this.$zoomLevels) {
       el.removeClass("hidden").text(text);
     }
 
-    this.$container.css("image-rendering", this.zoomLevel > 1 ? "pixelated" : "auto");
+    this.$container.css("image-rendering", zoomLevel > 1 ? "pixelated" : "auto");
   }
 
   get zoomLevel() {
+    // @ts-ignore
     return (this.$image.width() * this.panzoom.getTransform().scale) / Number(this.$image.attr("width"));
   }
 }
 
-$(ImagePanzoom.initialize);
+$(PanzoomOnPosts.initialize);
 
 new MutationObserver((_mutationList, _observer) => {
-  $(ImagePanzoom.initialize)
+  $(PanzoomOnPosts.initialize);
 }).observe(document.body, { childList: true, subtree: true });
