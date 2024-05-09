@@ -1,11 +1,13 @@
 ## Installation
 
 - Install a userscript manager (Tampermonkey, Greasemonkey, Firemonkey, etc.)
-- Click the "Install" link below the script you want below
+- Click the "Install"/"Minified" link below the script you want below
 
 ## Danbooru Page Selector
 
-[Install](https://raw.githubusercontent.com/ddmgy/userscripts/master/DanbooruPageSelector.user.js)
+[Install](https://github.com/ddmgy/userscripts/blob/master/danbooru-page-selector/dist/danbooru-page-selector.user.js?raw=true)
+
+[Minified](https://github.com/ddmgy/userscripts/blob/master/danbooru-page-selector/dist/danbooru-page-selector.min.user.js?raw=true)
 
 Adds a page selector to any page on Danbooru that has a paginator. Input a number and press Return key.
 
