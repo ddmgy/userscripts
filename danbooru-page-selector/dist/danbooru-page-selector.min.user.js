@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        danbooru-page-selector
-// @version     0.1.0
+// @version     0.1.1
 // @description Adds a page selector to any page on Danbooru that has a paginator
 // @author      ddmgy
 // @namespace   ddmgy
@@ -12,8 +12,8 @@
 // @updateURL   https://github.com/ddmgy/userscripts/blob/master/danbooru-page-selector/dist/danbooru-page-selector.min.user.js?raw=true
 // ==/UserScript==
 
-"use strict";(()=>{function r(n){let e=new window.URL(window.location.href),a=+(e.searchParams.get("page")??1);$(n).replaceWith(`
-    <form id="dps-paginator-selector-form" >
-      <input id="dps-paginator-selector" type="number" min="1" value="${a}" size="8" maxlength="8" />
+"use strict";(()=>{function o(t){let e=new window.URL(window.location.href),i=+(e.searchParams.get("page")??1);$(t).replaceWith(`
+    <form id="dps-form" >
+      <input id="dps-input" type="number" min="1" value="${i}" size="8" maxlength="8" />
     </form>
-  `),$("dps-paginator-selector-form").on("submit",o=>{o.preventDefault();let t=$("#dps-paginator-selector").val();t===void 0||t===""||t===a||(e.searchParams.set("page",t.toString()),window.location.href=e.toString())})}function i(){$("span.paginator-current").each((n,e)=>r(e))}$(i);})();
+  `),$("#dps-form").off().on("submit",a=>{a.preventDefault();let n=$("#dps-input").val();n===void 0||n===""||+n===i||(e.searchParams.set("page",n.toString()),window.location.href=e.toString())})}function r(){$("span.paginator-current").each((t,e)=>o(e))}$(r);})();

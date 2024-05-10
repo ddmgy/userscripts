@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        danbooru-page-selector
-// @version     0.1.0
+// @version     0.1.1
 // @description Adds a page selector to any page on Danbooru that has a paginator
 // @author      ddmgy
 // @namespace   ddmgy
@@ -19,14 +19,14 @@
     const url = new window.URL(window.location.href);
     const page = +(url.searchParams.get("page") ?? 1);
     $(element).replaceWith(`
-    <form id="dps-paginator-selector-form" >
-      <input id="dps-paginator-selector" type="number" min="1" value="${page}" size="8" maxlength="8" />
+    <form id="dps-form" >
+      <input id="dps-input" type="number" min="1" value="${page}" size="8" maxlength="8" />
     </form>
   `);
-    $("dps-paginator-selector-form").on("submit", (event) => {
+    $("#dps-form").off().on("submit", (event) => {
       event.preventDefault();
-      const newPage = $("#dps-paginator-selector").val();
-      if (newPage === void 0 || newPage === "" || newPage === page) {
+      const newPage = $("#dps-input").val();
+      if (newPage === void 0 || newPage === "" || +newPage === page) {
         return;
       }
       url.searchParams.set("page", newPage.toString());

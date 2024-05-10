@@ -3,16 +3,16 @@ function createPageSelector(element: HTMLElement): void {
   const page = +(url.searchParams.get("page") ?? 1);
 
   $(element).replaceWith(`
-    <form id="dps-paginator-selector-form" >
-      <input id="dps-paginator-selector" type="number" min="1" value="${page}" size="8" maxlength="8" />
+    <form id="dps-form" >
+      <input id="dps-input" type="number" min="1" value="${page}" size="8" maxlength="8" />
     </form>
   `);
 
-  $("dps-paginator-selector-form").on("submit", (event) => {
+  $("#dps-form").off().on("submit", (event: JQuery.SubmitEvent) => {
     event.preventDefault();
 
-    const newPage = $("#dps-paginator-selector").val();
-    if (newPage === undefined || newPage === "" || newPage === page) {
+    const newPage = $("#dps-input").val();
+    if (newPage === undefined || newPage === "" || +newPage === page) {
       return;
     }
 
