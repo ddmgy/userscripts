@@ -1,6 +1,6 @@
 {
   "name": "danbooru-page-selector",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "ddmgy",
   "description": "Adds a page selector to any page on Danbooru that has a paginator",
   "license": "MIT",

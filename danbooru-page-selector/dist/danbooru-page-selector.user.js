@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        danbooru-page-selector
-// @version     0.1.1
+// @version     0.1.2
 // @description Adds a page selector to any page on Danbooru that has a paginator
 // @author      ddmgy
 // @namespace   ddmgy
@@ -15,17 +15,17 @@
 "use strict";
 (() => {
   // src/index.ts
-  function createPageSelector(element) {
+  function createPageSelector(i, element) {
     const url = new window.URL(window.location.href);
     const page = +(url.searchParams.get("page") ?? 1);
     $(element).replaceWith(`
-    <form id="dps-form" >
-      <input id="dps-input" type="number" min="1" value="${page}" size="8" maxlength="8" />
+    <form id="dps-form-${i}" >
+      <input id="dps-input-${i}" type="number" min="1" value="${page}" size="8" maxlength="8" />
     </form>
   `);
-    $("#dps-form").off().on("submit", (event) => {
+    $(`#dps-form-${i}`).off().on("submit", (event) => {
       event.preventDefault();
-      const newPage = $("#dps-input").val();
+      const newPage = $(`#dps-input-${i}`).val();
       if (newPage === void 0 || newPage === "" || +newPage === page) {
         return;
       }
@@ -34,7 +34,12 @@
     });
   }
   function initialize() {
-    $("span.paginator-current").each((_, el) => createPageSelector(el));
+    const paginator = $("div.paginator").detach();
+    if (paginator.length === 0) {
+      return;
+    }
+    $("div.posts-container").before(paginator.clone()).after(paginator);
+    $("span.paginator-current").each((i, el) => createPageSelector(i, el));
   }
   $(initialize);
 })();

@@ -10,6 +10,7 @@
 [Minified](https://github.com/ddmgy/userscripts/blob/master/danbooru-page-selector/dist/danbooru-page-selector.min.user.js?raw=true)
 
 Adds a page selector to any page on Danbooru that has a paginator. Input a number and press Return key.
+Also, adds a paginator both above and below the posts section.
 
 ![An example of the page selector](images/danbooru-page-selector.png)
 
