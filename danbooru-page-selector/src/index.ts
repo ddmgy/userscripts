@@ -22,14 +22,6 @@ function createPageSelector(i: number, element: HTMLElement): void {
 }
 
 function initialize(): void {
-  const paginator = $("div.paginator").detach();
-
-  if (paginator.length === 0) {
-    return;
-  }
-
-  $("div.posts-container").before(paginator.clone()).after(paginator);
-
   $("span.paginator-current").each((i, el) => createPageSelector(i, el));
 }
 

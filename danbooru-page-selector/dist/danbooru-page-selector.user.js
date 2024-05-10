@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        danbooru-page-selector
-// @version     0.1.2
+// @version     0.1.3
 // @description Adds a page selector to any page on Danbooru that has a paginator
 // @author      ddmgy
 // @namespace   ddmgy
@@ -34,11 +34,6 @@
     });
   }
   function initialize() {
-    const paginator = $("div.paginator").detach();
-    if (paginator.length === 0) {
-      return;
-    }
-    $("div.posts-container").before(paginator.clone()).after(paginator);
     $("span.paginator-current").each((i, el) => createPageSelector(i, el));
   }
   $(initialize);
