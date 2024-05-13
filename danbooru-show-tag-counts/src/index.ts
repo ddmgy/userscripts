@@ -1,3 +1,10 @@
+const DSTC_CSS = `
+.dstc-post-count {
+  font-weight: normal;
+  color: var(--tag-count-color);
+}
+`;
+
 type AddTagCountOptions = {
   headerSelector: string;
   tagSelector: string;
@@ -13,7 +20,6 @@ function addTagCount({ headerSelector, tagSelector }: AddTagCountOptions): void 
   $(original).append($("<span></span>", {
     "class": "dstc-post-count",
     "text": $(`.tag-type-${tagSelector}`).length,
-    "style": "font-weight: normal; color: var(--tag-count-color)",
   }));
 }
 
@@ -48,6 +54,7 @@ function initialize(): void {
   }
 }
 
+GM_addStyle(DSTC_CSS);
 $(initialize);
 
 new MutationObserver((_mutationList, _observer) => {

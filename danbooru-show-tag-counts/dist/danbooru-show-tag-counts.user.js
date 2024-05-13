@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name        danbooru-show-tag-counts
-// @version     0.1.1
+// @version     0.1.2
 // @description Show tag counts on Danbooru posts
 // @author      ddmgy
 // @namespace   ddmgy
 // @match       *://*.donmai.us/posts/*
 // @exclude     /^https?://\w+\.donmai\.us/posts/.*\.(xml|json|atom)(\?|$)/
-// @grant       none
+// @grant       GM_addStyle
 // @downloadURL https://github.com/ddmgy/userscripts/blob/master/danbooru-show-tag-counts/dist/danbooru-show-tag-counts.user.js?raw=true
 // @updateURL   https://github.com/ddmgy/userscripts/blob/master/danbooru-show-tag-counts/dist/danbooru-show-tag-counts.user.js?raw=true
 // ==/UserScript==
@@ -14,6 +14,12 @@
 "use strict";
 (() => {
   // src/index.ts
+  var DSTC_CSS = `
+.dstc-post-count {
+  font-weight: normal;
+  color: var(--tag-count-color);
+}
+`;
   function addTagCount({ headerSelector, tagSelector }) {
     const original = $(`h3.${headerSelector}-tag-list`);
     if (original.length === 0) {
@@ -22,8 +28,7 @@
     }
     $(original).append($("<span></span>", {
       "class": "dstc-post-count",
-      "text": $(`.tag-type-${tagSelector}`).length,
-      "style": "font-weight: normal; color: var(--tag-count-color)"
+      "text": $(`.tag-type-${tagSelector}`).length
     }));
   }
   function initialize() {
@@ -54,6 +59,7 @@
       addTagCount(tagType);
     }
   }
+  GM_addStyle(DSTC_CSS);
   $(initialize);
   new MutationObserver((_mutationList, _observer) => {
     $(initialize);
