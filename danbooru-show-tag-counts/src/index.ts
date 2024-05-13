@@ -13,7 +13,7 @@ function addTagCount({ headerSelector, tagSelector }: AddTagCountOptions): void 
   $(original).append($("<span></span>", {
     "class": "dstc-post-count",
     "text": $(`.tag-type-${tagSelector}`).length,
-    "style": "font-weight: normal",
+    "style": "font-weight: normal; color: var(--tag-count-color)",
   }));
 }
 
