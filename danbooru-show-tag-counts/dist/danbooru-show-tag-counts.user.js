@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        danbooru-show-tag-counts
-// @version     0.1.2
+// @version     0.1.3
 // @description Show tag counts on Danbooru posts
 // @author      ddmgy
 // @namespace   ddmgy
@@ -61,7 +61,4 @@
   }
   GM_addStyle(DSTC_CSS);
   $(initialize);
-  new MutationObserver((_mutationList, _observer) => {
-    $(initialize);
-  }).observe(document.body, { childList: true, subtree: true });
 })();

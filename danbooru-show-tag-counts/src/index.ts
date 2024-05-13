@@ -56,7 +56,3 @@ function initialize(): void {
 
 GM_addStyle(DSTC_CSS);
 $(initialize);
-
-new MutationObserver((_mutationList, _observer) => {
-  $(initialize);
-}).observe(document.body, { childList: true, subtree: true });
