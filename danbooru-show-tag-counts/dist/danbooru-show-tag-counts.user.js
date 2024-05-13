@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        danbooru-show-tag-counts
-// @version     0.1.0
+// @version     0.1.1
 // @description Show tag counts on Danbooru posts
 // @author      ddmgy
 // @namespace   ddmgy
@@ -21,12 +21,13 @@
       return;
     }
     $(original).append($("<span></span>", {
-      "class": "post-count",
+      "class": "dstc-post-count",
       "text": $(`.tag-type-${tagSelector}`).length,
       "style": "font-weight: normal"
     }));
   }
   function initialize() {
+    $(".dstc-post-count").remove();
     const tagTypes = [
       {
         headerSelector: "artist",
@@ -54,4 +55,7 @@
     }
   }
   $(initialize);
+  new MutationObserver((_mutationList, _observer) => {
+    $(initialize);
+  }).observe(document.body, { childList: true, subtree: true });
 })();

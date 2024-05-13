@@ -11,13 +11,15 @@ function addTagCount({ headerSelector, tagSelector }: AddTagCountOptions): void 
   }
 
   $(original).append($("<span></span>", {
-    "class": "post-count",
+    "class": "dstc-post-count",
     "text": $(`.tag-type-${tagSelector}`).length,
     "style": "font-weight: normal",
   }));
 }
 
 function initialize(): void {
+  $(".dstc-post-count").remove();
+
   const tagTypes: AddTagCountOptions[] = [
     {
       headerSelector: "artist",
@@ -47,3 +49,7 @@ function initialize(): void {
 }
 
 $(initialize);
+
+new MutationObserver((_mutationList, _observer) => {
+  $(initialize);
+}).observe(document.body, { childList: true, subtree: true });
