@@ -38,3 +38,13 @@ Add panzoom to posts on Danbooru, just like the [media asset panzoom userscript 
 Show tag counts on Danbooru posts.
 
 ![An example of the tag counts](images/danbooru-show-tag-counts.png)
+
+## Danbooru - Sort Tags
+
+[Install](https://github.com/ddmgy/userscripts/blob/master/danbooru-sort-tags/dist/danbooru-sort-tags.user.js?raw=true)
+
+[Minified](https://github.com/ddmgy/userscripts/blob/master/danbooru-sort-tags/dist/danbooru-sort-tags.min.user.js?raw=true)
+
+Sort tag lists by name or post count.
+
+![An example of the tag sorting](images/danbooru-sort-tags.gif)
