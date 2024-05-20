@@ -1,48 +1,40 @@
 // ==UserScript==
 // @name        danbooru-show-profile-changes
-// @version     0.1.1
+// @version     0.2.0
 // @description Show changes to your Danbooru profile page
 // @author      ddmgy
 // @namespace   ddmgy
 // @match       *://*.donmai.us/profile
 // @match       *://*.donmai.us/users/*
-// @grant       none
+// @grant       GM_addStyle
+// @grant       GM_getValue
+// @grant       GM_setValue
+// @grant       GM_deleteValue
+// @grant       GM_listValues
 // @downloadURL https://github.com/ddmgy/userscripts/blob/master/danbooru-show-profile-changes/dist/danbooru-show-profile-changes.min.user.js?raw=true
 // @updateURL   https://github.com/ddmgy/userscripts/blob/master/danbooru-show-profile-changes/dist/danbooru-show-profile-changes.min.user.js?raw=true
 // ==/UserScript==
 
-"use strict";(()=>{var h=(t,e)=>()=>(e||t((e={exports:{}}).exports,e),e.exports);var m=h(()=>{"use strict"});var g=m();function b(t){if(t===""||typeof window>"u")return;let e=document.createElement("style");e.setAttribute("type","text/css"),e.innerHTML=t,document.head.appendChild(e)}var d=class{static number(e){let s=/(\d+)/.exec(e.text());return s===null?null:+s[1]}},u=class{static numbers(e,s){return s-e}static objects(e,s){let r={};for(let n of Object.keys(e))r[n]=s[n]-e[n];return r}},l=class{static get(e){let s=window.localStorage.getItem(`dspc-${e}`);return s===null?null:JSON.parse(s)}static set(e,s){window.localStorage.setItem(`dspc-${e}`,JSON.stringify(s))}static remove(e){window.localStorage.removeItem(`dspc-${e}`)}};function v(t){let e=s=>{if(typeof s=="string")return s!=="";if(typeof s=="number")return s>0;if(typeof s=="boolean")return s;if(typeof s=="object"){for(let r of Object.values(s))if(!e(r))return!1;return!0}return!1};return t===0?"neutral":e(t)?"positive":"negative"}function y(t,e){return`
-    <sup class="dspc-${v(t)}" title="${e===void 0?"":e}">
-      ${t}
+"use strict";(()=>{var S=`
+.dspc-positive {
+  color: var(--green-4);
+}
+.dspc-neutral {
+  color: var(--grey-4);
+  display: none;
+}
+.dspc-negative {
+  color: var(--red-4);
+}
+#dspc-clear-button {
+  font-size: 14px;
+}
+`;var s=$("body").attr("data-current-user-id"),n=$("body").attr("data-current-user-name");function g(e){return`dspc-${e}`}var r=class{static get(t,a){return GM_getValue(g(t),a)}static set(t,a){GM_setValue(g(t),a)}static keys(){return GM_listValues()}static remove(t){GM_deleteValue(g(t))}};function b(e,t){return`
+    <sup class="dspc-${e===0?"neutral":e>0?"positive":"negative"}" title="${t===void 0?"":t}">
+      ${e}
     </sup>
-  `}var p=class t{static infos=[{key:"upload_limit_pending",selector:"tr.user-upload-limit a:nth-of-type(1)"},{key:"upload_limit_total",selector:"tr.user-upload-limit abbr"},{key:"uploads",selector:"tr.user-uploads a:nth-of-type(1)"},{key:"deleted_uploads",selector:"tr.user-deleted-uploads a"},{key:"favorites",selector:"tr.user-favorites a:nth-of-type(1)"},{key:"votes_posts",selector:"tr.user-votes a:nth-of-type(1)"},{key:"votes_comments",selector:"tr.user-votes a:nth-of-type(2)"},{key:"votes_forum_posts",selector:"tr.user-votes a:nth-of-type(3)"},{key:"favorite_groups",selector:"tr.user-favorite-groups a"},{key:"post_changes",selector:"tr.user-post-changes a:nth-of-type(1)"},{key:"note_changes_total",selector:"tr.user-note-changes a:nth-of-type(1)"},{key:"note_changes_posts",selector:"tr.user-note-changes a:nth-of-type(2)"},{key:"wiki_page_changes",selector:"tr.user-wiki-page-changes a"},{key:"artist_changes",selector:"tr.user-artist-changes a"},{key:"commentary_changes",selector:"tr.user-commentary-changes a"},{key:"forum_posts",selector:"tr.user-forum-posts a"},{key:"approvals",selector:"tr.user-approvals a"},{key:"comments_total",selector:"tr.user-comments a:nth-of-type(1)"},{key:"comments_posts",selector:"tr.user-comments a:nth-of-type(2)"},{key:"appeals",selector:"tr.user-appeals a"},{key:"flags",selector:"tr.user-flags a"},{key:"feedback",selector:"tr.user-feedback a",extractor:e=>{let r=/positive:(\d+)\s+neutral:(\d+)\s+negative:(\d+)/.exec(e.text());return r===null?null:{positive:+r[1],neutral:+r[2],negative:+r[3]}},comparator:u.objects,render:(e,s,r,n)=>{let i=$(e).attr("href"),a=o=>`
-          <a href="${i}&search%5Bcategory%5D=${o}" title="${s[o]}">
-            ${o}:${r[o]}
-            ${y(n[o])}
-          </a>
-        `;$(e).replaceWith(`
-          <div>
-            <a href="${i}">all</a>
-            ${a("positive")}
-            ${a("neutral")}
-            ${a("negative")}
-          </div>
-        `)}}];static initialize(){let e=$("body").attr("data-current-user-id"),s=$("body").attr("data-current-user-name");if(e===void 0||s===void 0){g.error("Unable to retrieve user information");return}s===$("a.user").text()&&(b(`
-    .dspc-positive {
-      color: var(--green-4);
-    }
-    .dspc-neutral {
-      color: var(--grey-4);
-      display: none;
-    }
-    .dspc-negative {
-      color: var(--red-4);
-    }
-    #dspc-clear-button {
-      font-size: 14px;
-    }
-    `),t.addClassNames(),t.processAll(),t.addButton())}static addClassNames(){let e=[{index:1,className:"user-id"},{index:2,className:"user-join-date"},{index:4,className:"user-level"},{index:5,className:"user-upload-limit"},{index:6,className:"user-uploads"},{index:7,className:"user-deleted-uploads"},{index:8,className:"user-favorites"},{index:9,className:"user-votes"},{index:10,className:"user-favorite-groups"},{index:11,className:"user-post-changes"},{index:12,className:"user-note-changes"},{index:13,className:"user-wiki-page-changes"},{index:14,className:"user-artist-changes"},{index:15,className:"user-commentary-changes"},{index:16,className:"user-pool-changes"},{index:17,className:"user-forum-posts"},{index:18,className:"user-approvals"},{index:19,className:"user-comments"},{index:20,className:"user-appeals"},{index:21,className:"user-flags"},{index:22,className:"user-feedback"},{index:23,className:"user-api-key"}];for(let{index:s,className:r}of e)$(`tr:nth-of-type(${s})`).addClass(r)}static processAll(){for(let e of t.infos)t.processInfo(e)}static processInfo({key:e,selector:s,extractor:r=d.number,comparator:n=u.numbers,render:i}){let a=l.get(e),o=$(s);if(o.length===0){console.error(`[danbooru-show-profile-changes] Cannot selector element for key "${e}"`);return}let c=r(o);if(c===null){console.error(`[danbooru-show-profile-changes] Cannot extract data for key "${e}`);return}if(a!==null){let f=n(a,c);i!==void 0?i(o,a,c,f):$(o).after(y(f,a.toString()))}l.set(e,c)}static addButton(){$("a.user").after(`
-      <div class="dspc-clear-data">
-        <button id="dspc-clear-button" title="Reset danbooru-show-profile-changes stored data">\u27F3</button>
-      </div>
-    `),$("#dspc-clear-button").on("click",()=>{for(let{key:e}of t.infos)console.log(`[danbooru-show-profile-changes] removing key "${e}"`),l.remove(e);g.notice("Cleared stored data for danbooru-show-profile-changes")})}};$(p.initialize);})();
+  `}var v=[{name:"upload_limit_pending",endpoint:"post",selector:"tr.user-upload-limit a:nth-of-type(1)",timeKey:"created_at",addSearchParams:e=>{e.set("tags",`user:${n}+status:pending`)}},{name:"uploads",endpoint:"post",selector:"tr.user-uploads a:nth-of-type(1)",timeKey:"created_at",addSearchParams:e=>{e.set("tags",`user:${n}`)}},{name:"deleted_uploads",endpoint:"post",selector:"tr.user-deleted-uploads a",timeKey:"updated_at",addSearchParams:e=>{e.set("tags",`user:${n}+status:deleted`)}},{name:"favorites",endpoint:"post",selector:"tr.user-favorites a:nth-of-type(1)",timeKey:"updated_at",addSearchParams:e=>{e.set("tags",`ordfav:${n}`)}},{name:"post_votes",endpoint:"post_votes",selector:"tr.user-votes a:nth-of-type(1)",timeKey:"updated_at",addSearchParams:e=>{e.set("search[user_id]",`${s}`)}},{name:"comment_votes",endpoint:"comment_votes",selector:"tr.user-votes a:nth-of-type(2)",timeKey:"updated_at",addSearchParams:e=>{e.set("search[user_id]",`${s}`)}},{name:"forum_post_votes",endpoint:"forum_post_votes",selector:"tr.user-votes a:nth-of-type(3)",timeKey:"updated_at",addSearchParams:e=>{e.set("search[creator_id]",`${s}`)}},{name:"favorite_groups",endpoint:"favorite_groups",selector:"tr.user-favorite-groups a",timeKey:"updated_at",addSearchParams:e=>{e.set("search[creator_id]",`${s}`)}},{name:"post_versions",endpoint:"post_versions",selector:"tr.user-post-changes a:nth-of-type(1)",timeKey:"updated_at",addSearchParams:e=>{e.set("search[updater_id]",`${s}`)}},{name:"note_versions",endpoint:"note_versions",selector:"tr.user-note-changes a:nth-of-type(1)",timeKey:"created_at",addSearchParams:e=>{e.set("search[updater_id]",`${s}`)}},{name:"note_versions_posts",endpoint:"posts",selector:"tr.user-note-changes a:nth-of-type(2)",timeKey:"last_noted_at",addSearchParams:e=>{e.set("tags",`noteupdated:${n}+order:note`)}},{name:"wiki_page_versions",endpoint:"wiki_page_versions",selector:"tr.user-wiki-page-changes a",timeKey:"updated_at",addSearchParams:e=>{e.set("search[updater_id]",`${s}`)}},{name:"artist_versions",endpoint:"artist_versions",selector:"tr.user-artist-changes a",timeKey:"updated_at",addSearchParams:e=>{e.set("search[updater_id]",`${s}`)}},{name:"artist_commentary_versions",endpoint:"artist_commentary_versions",selector:"tr.user-commentary-changes a",timeKey:"updated_at",addSearchParams:e=>{e.set("search[updater_id]",`${s}`)}},{name:"pool_versions",endpoint:"pool_versions",selector:"tr.user-pool-changes a",timeKey:"updated_at",addSearchParams:e=>{e.set("search[updater_id]",`${s}`)}},{name:"forum_posts",endpoint:"forum_posts",selector:"tr.user-forum-posts a",timeKey:"updated_at",addSearchParams:e=>{e.set("search[creator_id]",`${s}`)}},{name:"approvals",endpoint:"posts",selector:"tr.user-approvals a",timeKey:"updated_at",addSearchParams:e=>{e.set("tags",`approver:${n}`)}},{name:"comments_total",endpoint:"comments",selector:"tr.user-comments a:nth-of-type(1)",timeKey:"updated_at",addSearchParams:e=>{e.set("group_by","comment"),e.set("search[creator_id]",`${s}`)}},{name:"comments_posts",endpoint:"posts",selector:"tr.user-comments a:nth-of-type(2)",timeKey:"updated_at",addSearchParams:e=>{e.set("tags",`commenter:${n}+order:comment_bumped`)}},{name:"post_appeals",endpoint:"post_appeals",selector:"tr.user-appeals a",timeKey:"updated_at",addSearchParams:e=>{e.set("search[creator_id]",`${s}`)}},{name:"post_flags",endpoint:"post_flags",selector:"tr.user-flags a",timeKey:"updated_at",addSearchParams:e=>{e.set("search[creator_id]",`${s}`)}}];function P(e){let t=new URL(`https://danbooru.donmai.us/${e}.json`);return t.searchParams.set("limit","20"),t.searchParams.set("page","1"),t}function x(){let e=[{index:1,className:"user-id"},{index:2,className:"user-join-date"},{index:4,className:"user-level"},{index:5,className:"user-upload-limit"},{index:6,className:"user-uploads"},{index:7,className:"user-deleted-uploads"},{index:8,className:"user-favorites"},{index:9,className:"user-votes"},{index:10,className:"user-favorite-groups"},{index:11,className:"user-post-changes"},{index:12,className:"user-note-changes"},{index:13,className:"user-wiki-page-changes"},{index:14,className:"user-artist-changes"},{index:15,className:"user-commentary-changes"},{index:16,className:"user-pool-changes"},{index:17,className:"user-forum-posts"},{index:18,className:"user-approvals"},{index:19,className:"user-comments"},{index:20,className:"user-appeals"},{index:21,className:"user-flags"},{index:22,className:"user-feedback"},{index:23,className:"user-api-key"}];for(let{index:t,className:a}of e)$(`tr:nth-of-type(${t})`).addClass(a)}function K(){$("a.user").after(`
+    <div class="dspc-clear-data">
+      <button id="dspc-clear-button" title="Reset danbooru-show-profile-changes stored data">\u27F3</button>
+    </div>
+  `),$("#dspc-clear-button").on("click",()=>{for(let{name:e}of v)console.log(`[danbooru-show-profile-changes] removing key "${e}"`),r.remove(e)})}function N(){let e=$("tr.user-feedback a").clone(),t=$("<div></div>"),a=/positive:(\d+)\s+neutral:(\d+)\s+negative:(\d+)/.exec(e.text());a!==null&&(t.append(e.text("all ")),t.append(`<a href="${e.attr("href")}&search[category]=positive">positive:${+a[1]} </a>`),t.append(`<a href="${e.attr("href")}&search[category]=neutral">neutral:${+a[2]} </a>`),t.append(`<a href="${e.attr("href")}&search[category]=negative">negative:${+a[3]} </a>`),$("tr.user-feedback a").replaceWith(t))}async function k(e,t){let a=r.get(t.name);if(a!==void 0)return console.log(`[danbooru-show-profile-changes] value for key "${t.name}" already exists: ${a}`),{info:t,value:a};let o=P(t.endpoint);t.addSearchParams(o.searchParams),o.searchParams.set("only",t.timeKey);var i=0,u=1;e:for(;;){let p=await fetch(o);if(!p.ok)break;let m=await p.json();if(m.length===0)break;for(let d of m){if(Date.parse(d[t.timeKey].substring(0,16))<e)break e;i+=1}if(m.length!=20)break;u+=1,o.searchParams.set("page",`${u}`)}return console.log(`[danbooru-show-profile-changes] "${t.name}": ${i}`),{info:t,value:i}}function w(){if(s===void 0||n===void 0||n!==$("a.user").text())return;console.log("[danbooru-show-profile-changes] init"),GM_addStyle(S),x(),K(),N();let e=new Date;e.setHours(0),e.setMinutes(0),e.setSeconds(0);let t=e.getTime(),a=e.getFullYear().toString().padStart(4,"0"),o=e.getMonth().toString().padStart(2,"0"),i=e.getDay().toString().padStart(2,"0"),u=`${a}-${o}-${i}`,p=r.get("date_key");if(p===void 0||p!==u){console.log("[danbooru-show-profile-changes] It's a new day, resetting counts");let d=r.keys();for(let c of d)r.remove(c)}r.set("date_key",u);let m=v.map(d=>k(t,d));Promise.all(m).then(d=>{for(let c of d){let l=$(c.info.selector);if(l.length===0)continue;let _=/(\d+)/.exec(l.text());if(_===null)continue;let f=r.get(c.info.name),y=+_[1],h=f===void 0?y-c.value:f;$(l).after(b(y-h,`${h}`)),r.set(c.info.name,h)}})}$(w);})();
