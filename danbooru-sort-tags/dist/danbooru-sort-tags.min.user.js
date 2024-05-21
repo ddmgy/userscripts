@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        danbooru-sort-tags
-// @version     0.1.0
+// @version     0.1.1
 // @description Sort tags on Danbooru by name or post count
 // @author      ddmgy
 // @namespace   ddmgy
@@ -16,7 +16,7 @@
 
 "use strict";(()=>{var T=`
 <section class="dst-collapsible" id="dst-section">
-  <h2>Sorting</h2>
+  <h3>Sorting</h3>
   <label for="dst-sort-by">Sort by:</label>
   <select id="dst-sort-by">
     <option value="name" selected="selected">Name</option>
