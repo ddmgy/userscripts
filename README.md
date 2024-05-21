@@ -19,7 +19,7 @@ Adds a page selector to any page on Danbooru that has a paginator. Input a numbe
 
 [Minified](https://github.com/ddmgy/userscripts/blob/master/danbooru-show-profile-changes/dist/danbooru-show-profile-changes.min.user.js?raw=true)
 
-Keep track of information on user profile, and displays the changes each time you reload the page.
+Keep track of information on user profile, and displays the changes for the current day (since midnight).
 
 ## Danbooru - Panzoom on Posts
 
