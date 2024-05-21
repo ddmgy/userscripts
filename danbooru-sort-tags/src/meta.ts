@@ -5,7 +5,6 @@
 // @author      AUTHOR
 // @namespace   AUTHOR
 // @match       *://*.donmai.us/posts/*
-// @match       *://*.donmai.us/posts?*
 // @exclude     /^https?://\w+\.donmai\.us/posts/.*\.(xml|json|atom)(\?|$)/
 // @grant       GM_getValue
 // @grant       GM_setValue

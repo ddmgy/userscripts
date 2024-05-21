@@ -147,7 +147,6 @@ function sortAll(): void {
     "ul.character-tag-list",
     "ul.general-tag-list",
     "ul.meta-tag-list",
-    "ul.search-tag-list",
   ];
 
   for (const container of containers) {
@@ -200,14 +199,7 @@ function loadSettings(): { sortBy: string, sortAscending: boolean } {
 }
 
 function initialize(): void {
-  const tagListContainers: string[] = [
-    "section#tag-list",
-    "section#tag-box",
-  ];
-
-  for (const tagListContainer of tagListContainers) {
-    setupUI(tagListContainer);
-  }
+  setupUI("section#tag-list");
 }
 
 $(initialize);

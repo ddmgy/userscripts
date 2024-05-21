@@ -1,11 +1,10 @@
 // ==UserScript==
 // @name        danbooru-sort-tags
-// @version     0.1.1
+// @version     0.1.2
 // @description Sort tags on Danbooru by name or post count
 // @author      ddmgy
 // @namespace   ddmgy
 // @match       *://*.donmai.us/posts/*
-// @match       *://*.donmai.us/posts?*
 // @exclude     /^https?://\w+\.donmai\.us/posts/.*\.(xml|json|atom)(\?|$)/
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -131,8 +130,7 @@
       "ul.copyright-tag-list",
       "ul.character-tag-list",
       "ul.general-tag-list",
-      "ul.meta-tag-list",
-      "ul.search-tag-list"
+      "ul.meta-tag-list"
     ];
     for (const container of containers) {
       $(container).each((_, el) => sortTagList(el));
@@ -167,13 +165,7 @@
     return { sortBy, sortAscending };
   }
   function initialize() {
-    const tagListContainers = [
-      "section#tag-list",
-      "section#tag-box"
-    ];
-    for (const tagListContainer of tagListContainers) {
-      setupUI(tagListContainer);
-    }
+    setupUI("section#tag-list");
   }
   $(initialize);
 })();
