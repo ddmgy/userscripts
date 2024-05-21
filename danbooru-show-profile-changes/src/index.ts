@@ -37,6 +37,12 @@ class DSPCStorage {
     return GM_listValues();
   }
 
+  static clear(): void {
+    for (const key of DSPCStorage.keys()) {
+      GM_deleteValue(key);
+    }
+  }
+
   static remove(key: string): void {
     GM_deleteValue(__getKey(key));
   }
@@ -257,10 +263,36 @@ const infos: Info[] = [
       params.set("search[creator_id]", `${userId}`);
     },
   },
-//   {
-//     key: "feedback",
-//     selector: "tr.user-feedback a",
-//   },
+  {
+    name: "feedback_positive",
+    endpoint: "user_feedbacks",
+    selector: "tr.user-feedback a:nth-of-type(2)",
+    timeKey: "updated_at",
+    addSearchParams: (params) => {
+      params.set("search[user_id]", `${userId}`);
+      params.set("search[category]", "positive");
+    },
+  },
+  {
+    name: "feedback_neutral",
+    endpoint: "user_feedbacks",
+    selector: "tr.user-feedback a:nth-of-type(3)",
+    timeKey: "updated_at",
+    addSearchParams: (params) => {
+      params.set("search[user_id]", `${userId}`);
+      params.set("search[category]", "neutral");
+    },
+  },
+  {
+    name: "feedback_negative",
+    endpoint: "user_feedbacks",
+    selector: "tr.user-feedback a:nth-of-type(4)",
+    timeKey: "updated_at",
+    addSearchParams: (params) => {
+      params.set("search[user_id]", `${userId}`);
+      params.set("search[category]", "negative");
+    },
+  },
 ];
 
 function getDefaultApiUrl(endpoint: string): URL {
@@ -311,10 +343,8 @@ function addButton(): void {
   `);
 
   $("#dspc-clear-button").on("click", () => {
-    for (const { name } of infos) {
-      console.log(`[danbooru-show-profile-changes] removing key "${name}"`);
-      DSPCStorage.remove(name);
-    }
+    console.log("[danbooru-show-profile-changes] clearing stored values");
+    DSPCStorage.clear();
   });
 }
 
@@ -336,10 +366,11 @@ function replaceFeedbackLink(): void {
 
 async function get(
   timestamp: number,
+  forceUpdate: boolean,
   info: Info,
 ): Promise<GetResult> {
   const stored = DSPCStorage.get<number>(info.name);
-  if (stored !== undefined) {
+  if (!forceUpdate && stored !== undefined) {
     console.log(`[danbooru-show-profile-changes] value for key "${info.name}" already exists: ${stored}`);
 
     return {
@@ -406,28 +437,21 @@ function initialize() {
   date.setHours(0);
   date.setMinutes(0);
   date.setSeconds(0);
+  date.setMilliseconds(0);
   const now = date.getTime();
 
   const year = date.getFullYear().toString().padStart(4, "0");
-  const month = date.getMonth().toString().padStart(2, "0");
-  const day = date.getDay().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
   const dateKey = `${year}-${month}-${day}`;
 
   const prevDateKey = DSPCStorage.get<string>("date_key");
-  if (prevDateKey === undefined || prevDateKey !== dateKey) {
-    console.log("[danbooru-show-profile-changes] It's a new day, resetting counts");
-
-    const keys = DSPCStorage.keys();
-
-    for (const key of keys) {
-      DSPCStorage.remove(key);
-    }
-  }
+  const forceUpdate = prevDateKey !== dateKey;
 
   DSPCStorage.set("date_key", dateKey);
 
   const fetchers: Promise<GetResult>[] = infos.map(
-    (info) => get(now, info),
+    (info) => get(now, forceUpdate, info),
   );
 
   Promise.all(fetchers).then((results) => {
@@ -444,7 +468,7 @@ function initialize() {
 
       const stored = DSPCStorage.get<number>(result.info.name);
       const current = +match[1];
-      const beforeMidnight = (stored === undefined)
+      const beforeMidnight = (stored === undefined || forceUpdate)
         ? (current - result.value)
         : stored;
 

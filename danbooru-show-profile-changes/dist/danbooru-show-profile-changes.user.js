@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        danbooru-show-profile-changes
-// @version     0.2.0
+// @version     0.2.1
 // @description Show changes to your Danbooru profile page
 // @author      ddmgy
 // @namespace   ddmgy
@@ -39,7 +39,7 @@
   function __getKey(key) {
     return `dspc-${key}`;
   }
-  var DSPCStorage = class {
+  var DSPCStorage = class _DSPCStorage {
     static get(key, defaultValue) {
       const stored = GM_getValue(__getKey(key), defaultValue);
       return stored;
@@ -49,6 +49,11 @@
     }
     static keys() {
       return GM_listValues();
+    }
+    static clear() {
+      for (const key of _DSPCStorage.keys()) {
+        GM_deleteValue(key);
+      }
     }
     static remove(key) {
       GM_deleteValue(__getKey(key));
@@ -252,11 +257,37 @@
       addSearchParams: (params) => {
         params.set("search[creator_id]", `${userId}`);
       }
+    },
+    {
+      name: "feedback_positive",
+      endpoint: "user_feedbacks",
+      selector: "tr.user-feedback a:nth-of-type(2)",
+      timeKey: "updated_at",
+      addSearchParams: (params) => {
+        params.set("search[user_id]", `${userId}`);
+        params.set("search[category]", "positive");
+      }
+    },
+    {
+      name: "feedback_neutral",
+      endpoint: "user_feedbacks",
+      selector: "tr.user-feedback a:nth-of-type(3)",
+      timeKey: "updated_at",
+      addSearchParams: (params) => {
+        params.set("search[user_id]", `${userId}`);
+        params.set("search[category]", "neutral");
+      }
+    },
+    {
+      name: "feedback_negative",
+      endpoint: "user_feedbacks",
+      selector: "tr.user-feedback a:nth-of-type(4)",
+      timeKey: "updated_at",
+      addSearchParams: (params) => {
+        params.set("search[user_id]", `${userId}`);
+        params.set("search[category]", "negative");
+      }
     }
-    //   {
-    //     key: "feedback",
-    //     selector: "tr.user-feedback a",
-    //   },
   ];
   function getDefaultApiUrl(endpoint) {
     const url = new URL(`https://danbooru.donmai.us/${endpoint}.json`);
@@ -301,10 +332,8 @@
     </div>
   `);
     $("#dspc-clear-button").on("click", () => {
-      for (const { name } of infos) {
-        console.log(`[danbooru-show-profile-changes] removing key "${name}"`);
-        DSPCStorage.remove(name);
-      }
+      console.log("[danbooru-show-profile-changes] clearing stored values");
+      DSPCStorage.clear();
     });
   }
   function replaceFeedbackLink() {
@@ -320,9 +349,9 @@
     replacement.append(`<a href="${all.attr("href")}&search[category]=negative">negative:${+match[3]} </a>`);
     $("tr.user-feedback a").replaceWith(replacement);
   }
-  async function get(timestamp, info) {
+  async function get(timestamp, forceUpdate, info) {
     const stored = DSPCStorage.get(info.name);
-    if (stored !== void 0) {
+    if (!forceUpdate && stored !== void 0) {
       console.log(`[danbooru-show-profile-changes] value for key "${info.name}" already exists: ${stored}`);
       return {
         info,
@@ -375,22 +404,17 @@
     date.setHours(0);
     date.setMinutes(0);
     date.setSeconds(0);
+    date.setMilliseconds(0);
     const now = date.getTime();
     const year = date.getFullYear().toString().padStart(4, "0");
-    const month = date.getMonth().toString().padStart(2, "0");
-    const day = date.getDay().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
     const dateKey = `${year}-${month}-${day}`;
     const prevDateKey = DSPCStorage.get("date_key");
-    if (prevDateKey === void 0 || prevDateKey !== dateKey) {
-      console.log("[danbooru-show-profile-changes] It's a new day, resetting counts");
-      const keys = DSPCStorage.keys();
-      for (const key of keys) {
-        DSPCStorage.remove(key);
-      }
-    }
+    const forceUpdate = prevDateKey !== dateKey;
     DSPCStorage.set("date_key", dateKey);
     const fetchers = infos.map(
-      (info) => get(now, info)
+      (info) => get(now, forceUpdate, info)
     );
     Promise.all(fetchers).then((results) => {
       for (const result of results) {
@@ -404,7 +428,7 @@
         }
         const stored = DSPCStorage.get(result.info.name);
         const current = +match[1];
-        const beforeMidnight = stored === void 0 ? current - result.value : stored;
+        const beforeMidnight = stored === void 0 || forceUpdate ? current - result.value : stored;
         $(element).after(__makeSup(current - beforeMidnight, `${beforeMidnight}`));
         DSPCStorage.set(result.info.name, beforeMidnight);
       }
