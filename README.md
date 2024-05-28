@@ -48,3 +48,11 @@ Show tag counts on Danbooru posts.
 Sort tag lists by name or post count.
 
 ![An example of the tag sorting](images/danbooru-sort-tags.gif)
+
+## Danbooru - Upload save tags
+
+[Install](https://github.com/ddmgy/userscripts/blob/master/danbooru-upload-save-tags/dist/danbooru-upload-save-tags.user.js?raw=true)
+
+[Minified](https://github.com/ddmgy/userscripts/blob/master/danbooru-upload-save-tags/dist/danbooru-upload-save-tags.min.user.js?raw=true)
+
+Save/load information on upload page. Information is deleted when loading a post for a given media asset, or after 5 days.
