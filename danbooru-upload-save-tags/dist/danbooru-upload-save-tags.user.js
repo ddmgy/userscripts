@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        danbooru-upload-save-tags
-// @version     0.1.0
+// @version     0.1.1
 // @description Add ability to save/load tags on uploads page
 // @author      ddmgy
 // @namespace   ddmgy
@@ -18,6 +18,12 @@
   var DB_NAME = "danbooru_upload_save_tags";
   var DB_VERSION = 2;
   var TABLE_NAME = "uploads";
+  function log(msg) {
+    console.log(`[danbooru-upload-save-tags] ${msg}`);
+  }
+  function error(msg) {
+    console.error(`[danbooru-upload-save-tags] ${msg}`);
+  }
   var DB = class _DB {
     db;
     constructor(db) {
@@ -27,13 +33,13 @@
       return new Promise((resolve, reject) => {
         const transaction = this.db.transaction(TABLE_NAME, "readwrite");
         transaction.addEventListener("error", (event) => {
-          console.error(`[danbooru-upload-save-tags] Error adding item: ${event}`);
+          error(`Error adding item: ${event}`);
           resolve(false);
         });
         const store = transaction.objectStore(TABLE_NAME);
         const request = store.add(upload);
         request.addEventListener("error", (event) => {
-          console.error(`[danbooru-upload-save-tags] Error adding item: ${event}`);
+          error(`Error adding item: ${event}`);
           resolve(false);
         });
         request.addEventListener("success", (event) => resolve(true));
@@ -43,13 +49,13 @@
       return new Promise((resolve, reject) => {
         const transaction = this.db.transaction(TABLE_NAME, "readwrite");
         transaction.addEventListener("error", (event) => {
-          console.error(`[danbooru-upload-save-tags] Error clearing database: ${event}`);
+          error(`Error clearing database: ${event}`);
           resolve(false);
         });
         const store = transaction.objectStore(TABLE_NAME);
         const request = store.clear();
         request.addEventListener("error", (event) => {
-          console.error(`[danbooru-upload-save-tags] Error clearing database: ${event}`);
+          error(`Error clearing database: ${event}`);
           resolve(false);
         });
         request.addEventListener("success", (event) => resolve(true));
@@ -59,13 +65,13 @@
       return new Promise((resolve, reject) => {
         const transaction = this.db.transaction(TABLE_NAME, "readonly");
         transaction.addEventListener("error", (event) => {
-          console.error(`[danbooru-upload-save-tags] Error counting items: ${event}`);
+          error(`Error counting items: ${event}`);
           resolve(-1);
         });
         const store = transaction.objectStore(TABLE_NAME);
         const request = store.count();
         request.addEventListener("error", (event) => {
-          console.error(`[danbooru-upload-save-tags] Error counting items: ${event}`);
+          error(`Error counting items: ${event}`);
           resolve(-1);
         });
         request.addEventListener("success", (event) => resolve(request.result));
@@ -75,45 +81,44 @@
       return new Promise((resolve, reject) => {
         const transaction = this.db.transaction(TABLE_NAME, "readwrite");
         transaction.addEventListener("error", (event) => {
-          console.error(`[danbooru-upload-save-tags] Error deleting item: ${event}`);
+          error(`Error deleting item: ${event}`);
           resolve(false);
         });
         const store = transaction.objectStore(TABLE_NAME);
         const request = store.delete(key);
         request.addEventListener("error", (event) => {
-          console.error(`[danbooru-upload-save-tags] Error deleting item: ${event}`);
+          error(`Error deleting item: ${event}`);
           resolve(false);
         });
         request.addEventListener("success", (event) => resolve(true));
       });
     }
     deleteOld(now) {
-      return new Promise((resolve, reject) => {
-        const transaction = this.db.transaction(TABLE_NAME, "readwrite");
-        transaction.addEventListener("error", (event) => {
-          console.error(`[danbooru-upload-save-tags] Error deleting items: ${event}`);
-          resolve(false);
-        });
-        const store = transaction.objectStore(TABLE_NAME);
-        const request = store.delete(IDBKeyRange.upperBound(now - 5 * 24 * 60 * 60 * 1e3));
-        request.addEventListener("error", (event) => {
-          console.error(`[danbooru-upload-save-tags] Error deleting items: ${event}`);
-          resolve(false);
-        });
-        request.addEventListener("success", (event) => resolve(true));
+      return new Promise(async (resolve, reject) => {
+        const timestamp = now - 5 * 24 * 60 * 60 * 1e3;
+        const request = await this.getAll();
+        for (const upload of request) {
+          if (upload.timestamp > timestamp) {
+            continue;
+          }
+          log(`deleting entry: ${upload.mediaAssetId}`);
+          const deleted = await this.delete(upload.mediaAssetId);
+          log(`  success?: ${deleted}`);
+        }
+        resolve(true);
       });
     }
     get(key) {
       return new Promise((resolve, reject) => {
         const transaction = this.db.transaction(TABLE_NAME, "readonly");
         transaction.addEventListener("error", (event) => {
-          console.error(`[danbooru-upload-save-tags] Error getting item: ${event}`);
+          error(`Error getting item: ${event}`);
           reject(new Error(`Error getting item: ${event}`));
         });
         const store = transaction.objectStore(TABLE_NAME);
         const request = store.get(key);
         request.addEventListener("error", (event) => {
-          console.error(`[danbooru-upload-save-tags] Error getting item: ${event}`);
+          error(`Error getting item: ${event}`);
           reject(new Error(`Error getting item: ${event}`));
         });
         request.addEventListener("success", function(event) {
@@ -125,13 +130,13 @@
       return new Promise((resolve, reject) => {
         const transaction = this.db.transaction(TABLE_NAME, "readonly");
         transaction.addEventListener("error", (event) => {
-          console.error(`[danbooru-upload-save-tags] Error getting items: ${event}`);
+          error(`Error getting items: ${event}`);
           reject(new Error(`Error getting items: ${event}`));
         });
         const store = transaction.objectStore(TABLE_NAME);
         const request = store.getAll();
         request.addEventListener("error", (event) => {
-          console.error(`[danbooru-upload-save-tags] Error getting items: ${event}`);
+          error(`Error getting items: ${event}`);
           reject(new Error(`Error getting items: ${event}`));
         });
         request.addEventListener("success", function(event) {
@@ -143,13 +148,13 @@
       return new Promise((resolve, reject) => {
         const transaction = this.db.transaction(TABLE_NAME, "readwrite");
         transaction.addEventListener("error", (event) => {
-          console.error(`[danbooru-upload-save-tags] Error putting item: ${event}`);
+          error(`Error putting item: ${event}`);
           resolve(false);
         });
         const store = transaction.objectStore(TABLE_NAME);
         const request = store.put(upload);
         request.addEventListener("error", (event) => {
-          console.error(`[danbooru-upload-save-tags] Error putting item: ${event}`);
+          error(`Error putting item: ${event}`);
           resolve(false);
         });
         request.addEventListener("success", (event) => resolve(true));
@@ -223,7 +228,7 @@
         parentId,
         timestamp
       });
-      console.log(`[danbooru-upload-save-tags] Saved information for media asset ${mediaAssetId}`);
+      log(`Saved information for media asset ${mediaAssetId}`);
     });
     loadButton.on("click", async () => {
       const upload = await db.get(mediaAssetId);
@@ -250,7 +255,7 @@
       $("#post_translated_commentary_title").val(translatedTitle);
       $("#post_translated_commentary_desc").val(translatedDescription);
       $("#post_parent_id").val(parentId);
-      console.log(`[danbooru-upload-save-tags] Loaded information for media asset ${mediaAssetId}`);
+      log(`Loaded information for media asset ${mediaAssetId}`);
     });
   }
   async function runPosts(db, id) {
@@ -267,9 +272,9 @@
       } else if (match = /\/posts\/(\d+)/.exec(window.location.pathname)) {
         runPosts(db, +match[1]);
       } else {
-        console.error(`[danbooru-upload-save-tags] running on unknown page: ${window.location.href}`);
+        error(`running on unknown page: ${window.location.href}`);
       }
-    }).catch((err) => console.error(`[danbooru-upload-save-tags] Error loading DB: ${err}`));
+    }).catch((err) => error(`Error loading DB: ${err}`));
   }
   $(initialize);
 })();
