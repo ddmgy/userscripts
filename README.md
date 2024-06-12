@@ -56,3 +56,13 @@ Sort tag lists by name or post count.
 [Minified](https://github.com/ddmgy/userscripts/blob/master/danbooru-upload-save-tags/dist/danbooru-upload-save-tags.min.user.js?raw=true)
 
 Save/load information on upload page. Information is deleted when loading a post for a given media asset, or after 5 days.
+
+## Danbooru - Rain effect
+
+[Install](https://github.com/ddmgy/userscripts/blob/master/danbooru-rain-effect/dist/danbooru-rain-effect.user.js?raw=true)
+
+[Minified](https://github.com/ddmgy/userscripts/blob/master/danbooru-rain-effect/dist/danbooru-rain-effect.min.user.js?raw=true)
+
+Add animated rain effect over posts on Danbooru, inspired by the [pixiv rain seasonal effect](https://dic.pixiv.net/en/a/pixivRain2024).
+
+![An example of the rain effect](images/danbooru-rain-effect.gif)
