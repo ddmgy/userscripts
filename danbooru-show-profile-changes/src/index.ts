@@ -57,6 +57,31 @@ function __makeSup(value: number, title?: string): string {
   `;
 }
 
+function __userLevelToNumber(userLevel: string): number {
+  switch (userLevel) {
+    case "Member":
+      return 20;
+    case "Gold":
+      return 30;
+    case "Platinum":
+      return 31;
+    case "Builder":
+      return 32;
+    case "Contributor":
+      return 35;
+    case "Approver":
+      return 37;
+    case "Moderator":
+      return 40;
+    case "Admin":
+      return 50;
+    case "Owner":
+      return 60;
+  };
+
+  return 10; // Default: Restricted
+}
+
 type AddSearchParams = (params: URLSearchParams) => void;
 
 type Info = {
@@ -477,6 +502,18 @@ function initialize() {
       DSPCStorage.set(result.info.name, beforeMidnight);
     }
   });
+
+  const currLevel = $("body").attr("data-current-user-level-string");
+  if (currLevel !== undefined) {
+    const prevLevel = DSPCStorage.get<string>("user_level");
+    if (prevLevel !== undefined) {
+      $("tr.user-level td").replaceWith(`<td>${currLevel} ${__makeSup(__userLevelToNumber(currLevel) - __userLevelToNumber(prevLevel), prevLevel)}</td>`);
+    } else {
+      $("tr.user-level td").replaceWith(`<td>${currLevel}</td>`);
+    }
+
+    DSPCStorage.set<string>("user_level", currLevel);
+  }
 }
 
 $(initialize);

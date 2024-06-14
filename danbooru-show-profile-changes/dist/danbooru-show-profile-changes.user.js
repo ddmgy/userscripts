@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        danbooru-show-profile-changes
-// @version     0.2.1
+// @version     0.2.2
 // @description Show changes to your Danbooru profile page
 // @author      ddmgy
 // @namespace   ddmgy
@@ -66,6 +66,30 @@
       ${value}
     </sup>
   `;
+  }
+  function __userLevelToNumber(userLevel) {
+    switch (userLevel) {
+      case "Member":
+        return 20;
+      case "Gold":
+        return 30;
+      case "Platinum":
+        return 31;
+      case "Builder":
+        return 32;
+      case "Contributor":
+        return 35;
+      case "Approver":
+        return 37;
+      case "Moderator":
+        return 40;
+      case "Admin":
+        return 50;
+      case "Owner":
+        return 60;
+    }
+    ;
+    return 10;
   }
   var infos = [
     {
@@ -433,6 +457,16 @@
         DSPCStorage.set(result.info.name, beforeMidnight);
       }
     });
+    const currLevel = $("body").attr("data-current-user-level-string");
+    if (currLevel !== void 0) {
+      const prevLevel = DSPCStorage.get("user_level");
+      if (prevLevel !== void 0) {
+        $("tr.user-level td").replaceWith(`<td>${currLevel} ${__makeSup(__userLevelToNumber(currLevel) - __userLevelToNumber(prevLevel), prevLevel)}</td>`);
+      } else {
+        $("tr.user-level td").replaceWith(`<td>${currLevel}</td>`);
+      }
+      DSPCStorage.set("user_level", currLevel);
+    }
   }
   $(initialize);
 })();
