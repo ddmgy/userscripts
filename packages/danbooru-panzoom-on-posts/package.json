@@ -1,0 +1,21 @@
+{
+  "name": "danbooru-panzoom-on-posts",
+  "version": "0.1.0",
+  "author": "ddmgy",
+  "description": "Add panzoom to posts on Danbooru",
+  "license": "MIT",
+  "scripts": {
+    "build": "node ../common/build.js build",
+    "dev": "node ../common/build.js dev",
+    "clean": "rm -rf dist"
+  },
+  "private": true,
+  "dependencies": {
+    "jquery": "^3.7.1"
+  },
+  "devDependencies": {
+    "@types/jquery": "^3.5.30",
+    "esbuild": "^0.21.1",
+    "typescript": "^5.4.5"
+  }
+}

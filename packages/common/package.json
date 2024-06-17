@@ -1,0 +1,12 @@
+{
+  "name": "common",
+  "version": "0.1.0",
+  "author": "ddmgy",
+  "description": "Common package for userscripts, shouldn't actually do anything",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "esbuild": "^0.21.1"
+  }
+}
