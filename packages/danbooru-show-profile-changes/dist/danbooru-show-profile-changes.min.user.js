@@ -11,8 +11,8 @@
 // @grant       GM_setValue
 // @grant       GM_deleteValue
 // @grant       GM_listValues
-// @downloadURL https://github.com/ddmgy/userscripts/blob/master/danbooru-show-profile-changes (minified)/dist/danbooru-show-profile-changes.min.user.js?raw=true
-// @updateURL   https://github.com/ddmgy/userscripts/blob/master/danbooru-show-profile-changes (minified)/dist/danbooru-show-profile-changes.min.user.js?raw=true
+// @downloadURL https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-show-profile-changes/dist/danbooru-show-profile-changes.min.user.js?raw=true
+// @updateURL   https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-show-profile-changes/dist/danbooru-show-profile-changes.min.user.js?raw=true
 // ==/UserScript==
 
 "use strict";(()=>{var k=`

@@ -6,8 +6,8 @@
 // @namespace   ddmgy
 // @match       *://*.donmai.us/posts/*
 // @grant       none
-// @downloadURL https://github.com/ddmgy/userscripts/blob/master/danbooru-panzoom-on-posts/dist/danbooru-panzoom-on-posts.user.js?raw=true
-// @updateURL   https://github.com/ddmgy/userscripts/blob/master/danbooru-panzoom-on-posts/dist/danbooru-panzoom-on-posts.user.js?raw=true
+// @downloadURL https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-panzoom-on-posts/dist/danbooru-panzoom-on-posts.user.js?raw=true
+// @updateURL   https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-panzoom-on-posts/dist/danbooru-panzoom-on-posts.user.js?raw=true
 // @require     https://unpkg.com/panzoom@^9.4.3/dist/panzoom.min.js
 // ==/UserScript==
 

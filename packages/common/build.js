@@ -9,7 +9,7 @@ const pkg = require(`${cwd}/package.json`);
 const meta = fs
   .readFileSync(`${cwd}/src/meta.ts`)
   .toString()
-  // .replace(/APP_NAME/g, pkg.name)
+  .replace(/DIR_NAME/g, pkg.name)
   .replace(/DESCRIPTION/g, pkg.description)
   .replace(/VERSION/g, pkg.version)
   .replace(/AUTHOR/g, pkg.author);

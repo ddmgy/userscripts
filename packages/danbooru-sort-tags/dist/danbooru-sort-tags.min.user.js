@@ -9,8 +9,8 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM_addStyle
-// @downloadURL https://github.com/ddmgy/userscripts/blob/master/danbooru-sort-tags (minified)/dist/danbooru-sort-tags.min.user.js?raw=true
-// @updateURL   https://github.com/ddmgy/userscripts/blob/master/danbooru-sort-tags (minified)/dist/danbooru-sort-tags.min.user.js?raw=true
+// @downloadURL https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-sort-tags/dist/danbooru-sort-tags.min.user.js?raw=true
+// @updateURL   https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-sort-tags/dist/danbooru-sort-tags.min.user.js?raw=true
 // ==/UserScript==
 
 "use strict";(()=>{var d=`

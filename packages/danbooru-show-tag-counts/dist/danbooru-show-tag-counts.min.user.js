@@ -7,8 +7,8 @@
 // @match       *://*.donmai.us/posts/*
 // @exclude     /^https?://\w+\.donmai\.us/posts/.*\.(xml|json|atom)(\?|$)/
 // @grant       GM_addStyle
-// @downloadURL https://github.com/ddmgy/userscripts/blob/master/danbooru-show-tag-counts (minified)/dist/danbooru-show-tag-counts.min.user.js?raw=true
-// @updateURL   https://github.com/ddmgy/userscripts/blob/master/danbooru-show-tag-counts (minified)/dist/danbooru-show-tag-counts.min.user.js?raw=true
+// @downloadURL https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-show-tag-counts/dist/danbooru-show-tag-counts.min.user.js?raw=true
+// @updateURL   https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-show-tag-counts/dist/danbooru-show-tag-counts.min.user.js?raw=true
 // ==/UserScript==
 
 "use strict";(()=>{var a=`

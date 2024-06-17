@@ -7,8 +7,8 @@
 // @match       *://*.donmai.us/posts/*
 // @grant       GM_addStyle
 // @run-at      document-body
-// @downloadURL https://github.com/ddmgy/userscripts/blob/master/danbooru-rain-effect/dist/danbooru-rain-effect.user.js?raw=true
-// @updateURL   https://github.com/ddmgy/userscripts/blob/master/danbooru-rain-effect/dist/danbooru-rain-effect.user.js?raw=true
+// @downloadURL https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-rain-effect/dist/danbooru-rain-effect.user.js?raw=true
+// @updateURL   https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-rain-effect/dist/danbooru-rain-effect.user.js?raw=true
 // ==/UserScript==
 
 "use strict";

@@ -8,8 +8,8 @@
 // @match       *://*.donmai.us/posts/*
 // @grant       none
 // @run-at      document-body
-// @downloadURL https://github.com/ddmgy/userscripts/blob/master/danbooru-upload-save-tags/dist/danbooru-upload-save-tags.user.js?raw=true
-// @updateURL   https://github.com/ddmgy/userscripts/blob/master/danbooru-upload-save-tags/dist/danbooru-upload-save-tags.user.js?raw=true
+// @downloadURL https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-upload-save-tags/dist/danbooru-upload-save-tags.user.js?raw=true
+// @updateURL   https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-upload-save-tags/dist/danbooru-upload-save-tags.user.js?raw=true
 // ==/UserScript==
 
 "use strict";
