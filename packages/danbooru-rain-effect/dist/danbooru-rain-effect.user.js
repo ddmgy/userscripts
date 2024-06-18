@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        danbooru-rain-effect
-// @version     0.1.0
+// @version     0.1.1
 // @description Add animated rain effect over posts on Danbooru
 // @author      ddmgy
 // @namespace   ddmgy
@@ -15,7 +15,7 @@
 (() => {
   // src/index.ts
   var DRE_CSS = `
-.rain { position: absolute; overflow: hidden; left: 0; width: 100%; height: 100%; }
+.rain { position: absolute; overflow: hidden; left: 0; width: 100%; height: 100%; pointer-events: none; }
 .rain.layer-1 { z-index: 4; opacity: 0.4; }
 .rain.layer-2 { z-index: 3; opacity: 1; }
 .rain.layer-3 { z-index: 2; opacity: 0.8; }
