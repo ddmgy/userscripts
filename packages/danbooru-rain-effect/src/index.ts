@@ -17,7 +17,7 @@ const DRE_CSS = `
 function drop(left: number, bottom: number, anim: number): string {
   const delay = `${anim / 100}s`;
   const duration = `${0.2 + (anim / 100)}s`;
-  return `<div class="drop" style="left: ${left}%; bottom; ${bottom}%; animation-delay: ${delay}; animation-duration: ${duration};"><div class="stem" style="animation-delay: ${delay}; animation-duration: ${duration};"></div></div>`;
+  return `<div class="drop" style="left: ${left}%; bottom: ${bottom}%; animation-delay: ${delay}; animation-duration: ${duration};"><div class="stem" style="animation-delay: ${delay}; animation-duration: ${duration};"></div></div>`;
 }
 
 function weightedRandom<T>(options: Array<{item: T, weight: number}>): T {
@@ -52,7 +52,7 @@ function initialize() {
   var increment = 0;
   while (increment < 100) {
     const anim = rand(30, 55);
-    const short = rand(3, 1);
+    const short = rand(2, 4);
     increment += short;
     const layer = weightedRandom([
       { item: 1, weight: 5 },

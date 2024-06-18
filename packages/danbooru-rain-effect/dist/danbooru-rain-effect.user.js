@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        danbooru-rain-effect
-// @version     0.1.1
+// @version     0.1.2
 // @description Add animated rain effect over posts on Danbooru
 // @author      ddmgy
 // @namespace   ddmgy
@@ -32,7 +32,7 @@
   function drop(left, bottom, anim) {
     const delay = `${anim / 100}s`;
     const duration = `${0.2 + anim / 100}s`;
-    return `<div class="drop" style="left: ${left}%; bottom; ${bottom}%; animation-delay: ${delay}; animation-duration: ${duration};"><div class="stem" style="animation-delay: ${delay}; animation-duration: ${duration};"></div></div>`;
+    return `<div class="drop" style="left: ${left}%; bottom: ${bottom}%; animation-delay: ${delay}; animation-duration: ${duration};"><div class="stem" style="animation-delay: ${delay}; animation-duration: ${duration};"></div></div>`;
   }
   function weightedRandom(options) {
     var i;
@@ -59,7 +59,7 @@
     var increment = 0;
     while (increment < 100) {
       const anim = rand(30, 55);
-      const short = rand(3, 1);
+      const short = rand(2, 4);
       increment += short;
       const layer = weightedRandom([
         { item: 1, weight: 5 },
