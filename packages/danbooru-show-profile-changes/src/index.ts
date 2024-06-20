@@ -9,9 +9,6 @@ const DSPC_CSS = `
 .dspc-negative {
   color: var(--red-4);
 }
-#dspc-clear-button {
-  font-size: 14px;
-}
 `;
 const REQUEST_LIMIT: number = 20;
 
@@ -24,9 +21,7 @@ function __getKey(key: string): string {
 
 class DSPCStorage {
   static get<T>(key: string, defaultValue?: T): T | undefined {
-    const stored = GM_getValue<T>(__getKey(key), defaultValue);
-
-    return stored;
+    return GM_getValue<T>(__getKey(key), defaultValue);
   }
 
   static set<T>(key: string, value: T): void {
@@ -100,7 +95,7 @@ type GetResult = {
 const infos: Info[] = [
   {
     name: "upload_limit_pending",
-    endpoint: "post",
+    endpoint: "posts",
     selector: "tr.user-upload-limit a:nth-of-type(1)",
     timeKey: "created_at",
     addSearchParams: (params) => {
@@ -109,7 +104,7 @@ const infos: Info[] = [
   },
   {
     name: "uploads",
-    endpoint: "post",
+    endpoint: "posts",
     selector: "tr.user-uploads a:nth-of-type(1)",
     timeKey: "created_at",
     addSearchParams: (params) => {
@@ -118,7 +113,7 @@ const infos: Info[] = [
   },
   {
     name: "deleted_uploads",
-    endpoint: "post",
+    endpoint: "posts",
     selector: "tr.user-deleted-uploads a",
     timeKey: "updated_at",
     addSearchParams: (params) => {
@@ -127,7 +122,7 @@ const infos: Info[] = [
   },
   {
     name: "favorites",
-    endpoint: "post",
+    endpoint: "posts",
     selector: "tr.user-favorites a:nth-of-type(1)",
     timeKey: "updated_at",
     addSearchParams: (params) => {
@@ -320,7 +315,7 @@ const infos: Info[] = [
   },
 ];
 
-function getDefaultApiUrl(endpoint: string): URL {
+function getApiUrl(endpoint: string): URL {
   const url = new URL(`https://danbooru.donmai.us/${endpoint}.json`);
   url.searchParams.set("limit", `${REQUEST_LIMIT}`);
   url.searchParams.set("page", "1");
@@ -329,45 +324,51 @@ function getDefaultApiUrl(endpoint: string): URL {
 }
 
 function addClassNames(): void {
-  const classNames = [
-    { index: 1, className: "user-id" },
-    { index: 2, className: "user-join-date" },
-    // index 3 already exists
-    { index: 4, className: "user-level" },
-    { index: 5, className: "user-upload-limit" },
-    { index: 6, className: "user-uploads" },
-    { index: 7, className: "user-deleted-uploads" },
-    { index: 8, className: "user-favorites" },
-    { index: 9, className: "user-votes" },
-    { index: 10, className: "user-favorite-groups" },
-    { index: 11, className: "user-post-changes" },
-    { index: 12, className: "user-note-changes" },
-    { index: 13, className: "user-wiki-page-changes" },
-    { index: 14, className: "user-artist-changes" },
-    { index: 15, className: "user-commentary-changes" },
-    { index: 16, className: "user-pool-changes" },
-    { index: 17, className: "user-forum-posts" },
-    { index: 18, className: "user-approvals" },
-    { index: 19, className: "user-comments" },
-    { index: 20, className: "user-appeals" },
-    { index: 21, className: "user-flags" },
-    { index: 22, className: "user-feedback" },
-    { index: 23, className: "user-api-key" },
-  ];
+  const encode = (path: string) => path.replace(/:/g, "%3A");
 
-  for (const { index, className } of classNames) {
-    $(`tr:nth-of-type(${index})`).addClass(className);
+  const classNames = [
+    { className: "user-level", selector: `href^="/upgrade"` },
+    { className: "user-upload-limit", selector: `href*="status:pending"` },
+    { className: "user-uploads", selector: `href="/posts?tags=user:${userName}"` },
+    { className: "user-deleted-uploads", selector: `href*="status:deleted"` },
+    { className: "user-favorites", selector: `href*="ordfav:${userName}"` },
+    { className: "user-votes", selector: `href^="/post_votes"` },
+    { className: "user-favorite-groups", selector: `href^="/favorite_groups"` },
+    { className: "user-post-changes", selector: `href^="/post_versions"` },
+    { className: "user-note-changes", selector: `href^="/note_versions"` },
+    { className: "user-wiki-page-changes", selector: `href^="/wiki_page_versions"` },
+    { className: "user-artist-changes", selector: `href^="/artist_versions"` },
+    { className: "user-commentary-changes", selector: `href^="/artist_commentary_versions"` },
+    { className: "user-pool-changes", selector: `href^="/pool_versions"` },
+    { className: "user-forum-posts", selector: `href^="/forum_posts"` },
+    { className: "user-approvals", selector: `href*="tags=approver:${userName}"` },
+    { className: "user-comments", selector: `href^="/comments"` },
+    { className: "user-appeals", selector: `href^="/post_appeals"` },
+    { className: "user-flags", selector: `href^="/post_flags"` },
+    { className: "user-feedback", selector: `href^="/user_feedbacks"` },
+    { className: "user-saved-searches", selector: `href*="search:"` },
+    { className: "user-api-key", selector: `href="/users/${userId}/api_keys"` },
+  ];
+  const rows = $("table.user-statistics tr");
+
+  for (const { className, selector } of classNames) {
+    const match = rows.find(`a[${encode(selector)}]`);
+    if (!match.length) { continue; }
+    match.parents("tr").addClass(className);
   }
 }
 
-function addButton(): void {
-  $("a.user").after(`
+function addClearButton(): void {
+  $("table.user-statistics").parent().after(`
+    <br />
     <div class="dspc-clear-data">
-      <button id="dspc-clear-button" title="Reset danbooru-show-profile-changes stored data">⟳</button>
+      <button id="dspc-clear-button">Reset danbooru-show-profile-changes stored data</button>
     </div>
   `);
 
   $("#dspc-clear-button").on("click", () => {
+    // @ts-ignore-
+    Danbooru.notice("Clearing danbooru-show-profile-changes stored data");
     console.log("[danbooru-show-profile-changes] clearing stored values");
     DSPCStorage.clear();
   });
@@ -396,15 +397,13 @@ async function get(
 ): Promise<GetResult> {
   const stored = DSPCStorage.get<number>(info.name);
   if (!forceUpdate && stored !== undefined) {
-    console.log(`[danbooru-show-profile-changes] value for key "${info.name}" already exists: ${stored}`);
-
     return {
       info,
       value: stored,
     };
   }
 
-  const apiUrl = getDefaultApiUrl(info.endpoint);
+  const apiUrl = getApiUrl(info.endpoint);
   info.addSearchParams(apiUrl.searchParams);
   apiUrl.searchParams.set("only", info.timeKey);
   var total: number = 0;
@@ -430,15 +429,13 @@ async function get(
       total += 1;
     }
 
-    if (result.length != 20) {
+    if (result.length != REQUEST_LIMIT) {
       break;
     }
 
     page += 1;
     apiUrl.searchParams.set("page", `${page}`);
   }
-
-  console.log(`[danbooru-show-profile-changes] "${info.name}": ${total}`);
 
   return {
     info,
@@ -447,14 +444,13 @@ async function get(
 }
 
 function initialize() {
-  if (userId === undefined || userName === undefined || userName !== $("a.user").text()) {
+  if (userId === undefined || userName === undefined || userName !== $("a.user").attr("data-user-name")) {
     return;
   }
 
-  console.log("[danbooru-show-profile-changes] init");
   GM_addStyle(DSPC_CSS);
   addClassNames();
-  addButton();
+  addClearButton();
   replaceFeedbackLink();
 
   // Create a date object at midnight, current day
@@ -463,7 +459,7 @@ function initialize() {
   date.setMinutes(0);
   date.setSeconds(0);
   date.setMilliseconds(0);
-  const now = date.getTime();
+  const midnight = date.getTime();
 
   const year = date.getFullYear().toString().padStart(4, "0");
   const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -476,7 +472,7 @@ function initialize() {
   DSPCStorage.set("date_key", dateKey);
 
   const fetchers: Promise<GetResult>[] = infos.map(
-    (info) => get(now, forceUpdate, info),
+    (info) => get(midnight, forceUpdate, info),
   );
 
   Promise.all(fetchers).then((results) => {

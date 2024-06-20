@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        danbooru-show-profile-changes
-// @version     0.2.2
+// @version     0.3.0
 // @description Show changes to your Danbooru profile page
 // @author      ddmgy
 // @namespace   ddmgy
@@ -29,9 +29,6 @@
 .dspc-negative {
   color: var(--red-4);
 }
-#dspc-clear-button {
-  font-size: 14px;
-}
 `;
   var REQUEST_LIMIT = 20;
   var userId = $("body").attr("data-current-user-id");
@@ -41,8 +38,7 @@
   }
   var DSPCStorage = class _DSPCStorage {
     static get(key, defaultValue) {
-      const stored = GM_getValue(__getKey(key), defaultValue);
-      return stored;
+      return GM_getValue(__getKey(key), defaultValue);
     }
     static set(key, value) {
       GM_setValue(__getKey(key), value);
@@ -94,7 +90,7 @@
   var infos = [
     {
       name: "upload_limit_pending",
-      endpoint: "post",
+      endpoint: "posts",
       selector: "tr.user-upload-limit a:nth-of-type(1)",
       timeKey: "created_at",
       addSearchParams: (params) => {
@@ -103,7 +99,7 @@
     },
     {
       name: "uploads",
-      endpoint: "post",
+      endpoint: "posts",
       selector: "tr.user-uploads a:nth-of-type(1)",
       timeKey: "created_at",
       addSearchParams: (params) => {
@@ -112,7 +108,7 @@
     },
     {
       name: "deleted_uploads",
-      endpoint: "post",
+      endpoint: "posts",
       selector: "tr.user-deleted-uploads a",
       timeKey: "updated_at",
       addSearchParams: (params) => {
@@ -121,7 +117,7 @@
     },
     {
       name: "favorites",
-      endpoint: "post",
+      endpoint: "posts",
       selector: "tr.user-favorites a:nth-of-type(1)",
       timeKey: "updated_at",
       addSearchParams: (params) => {
@@ -313,49 +309,55 @@
       }
     }
   ];
-  function getDefaultApiUrl(endpoint) {
+  function getApiUrl(endpoint) {
     const url = new URL(`https://danbooru.donmai.us/${endpoint}.json`);
     url.searchParams.set("limit", `${REQUEST_LIMIT}`);
     url.searchParams.set("page", "1");
     return url;
   }
   function addClassNames() {
+    const encode = (path) => path.replace(/:/g, "%3A");
     const classNames = [
-      { index: 1, className: "user-id" },
-      { index: 2, className: "user-join-date" },
-      // index 3 already exists
-      { index: 4, className: "user-level" },
-      { index: 5, className: "user-upload-limit" },
-      { index: 6, className: "user-uploads" },
-      { index: 7, className: "user-deleted-uploads" },
-      { index: 8, className: "user-favorites" },
-      { index: 9, className: "user-votes" },
-      { index: 10, className: "user-favorite-groups" },
-      { index: 11, className: "user-post-changes" },
-      { index: 12, className: "user-note-changes" },
-      { index: 13, className: "user-wiki-page-changes" },
-      { index: 14, className: "user-artist-changes" },
-      { index: 15, className: "user-commentary-changes" },
-      { index: 16, className: "user-pool-changes" },
-      { index: 17, className: "user-forum-posts" },
-      { index: 18, className: "user-approvals" },
-      { index: 19, className: "user-comments" },
-      { index: 20, className: "user-appeals" },
-      { index: 21, className: "user-flags" },
-      { index: 22, className: "user-feedback" },
-      { index: 23, className: "user-api-key" }
+      { className: "user-level", selector: `href^="/upgrade"` },
+      { className: "user-upload-limit", selector: `href*="status:pending"` },
+      { className: "user-uploads", selector: `href="/posts?tags=user:${userName}"` },
+      { className: "user-deleted-uploads", selector: `href*="status:deleted"` },
+      { className: "user-favorites", selector: `href*="ordfav:${userName}"` },
+      { className: "user-votes", selector: `href^="/post_votes"` },
+      { className: "user-favorite-groups", selector: `href^="/favorite_groups"` },
+      { className: "user-post-changes", selector: `href^="/post_versions"` },
+      { className: "user-note-changes", selector: `href^="/note_versions"` },
+      { className: "user-wiki-page-changes", selector: `href^="/wiki_page_versions"` },
+      { className: "user-artist-changes", selector: `href^="/artist_versions"` },
+      { className: "user-commentary-changes", selector: `href^="/artist_commentary_versions"` },
+      { className: "user-pool-changes", selector: `href^="/pool_versions"` },
+      { className: "user-forum-posts", selector: `href^="/forum_posts"` },
+      { className: "user-approvals", selector: `href*="tags=approver:${userName}"` },
+      { className: "user-comments", selector: `href^="/comments"` },
+      { className: "user-appeals", selector: `href^="/post_appeals"` },
+      { className: "user-flags", selector: `href^="/post_flags"` },
+      { className: "user-feedback", selector: `href^="/user_feedbacks"` },
+      { className: "user-saved-searches", selector: `href*="search:"` },
+      { className: "user-api-key", selector: `href="/users/${userId}/api_keys"` }
     ];
-    for (const { index, className } of classNames) {
-      $(`tr:nth-of-type(${index})`).addClass(className);
+    const rows = $("table.user-statistics tr");
+    for (const { className, selector } of classNames) {
+      const match = rows.find(`a[${encode(selector)}]`);
+      if (!match.length) {
+        continue;
+      }
+      match.parents("tr").addClass(className);
     }
   }
-  function addButton() {
-    $("a.user").after(`
+  function addClearButton() {
+    $("table.user-statistics").parent().after(`
+    <br />
     <div class="dspc-clear-data">
-      <button id="dspc-clear-button" title="Reset danbooru-show-profile-changes stored data">\u27F3</button>
+      <button id="dspc-clear-button">Reset danbooru-show-profile-changes stored data</button>
     </div>
   `);
     $("#dspc-clear-button").on("click", () => {
+      Danbooru.notice("Clearing danbooru-show-profile-changes stored data");
       console.log("[danbooru-show-profile-changes] clearing stored values");
       DSPCStorage.clear();
     });
@@ -376,13 +378,12 @@
   async function get(timestamp, forceUpdate, info) {
     const stored = DSPCStorage.get(info.name);
     if (!forceUpdate && stored !== void 0) {
-      console.log(`[danbooru-show-profile-changes] value for key "${info.name}" already exists: ${stored}`);
       return {
         info,
         value: stored
       };
     }
-    const apiUrl = getDefaultApiUrl(info.endpoint);
+    const apiUrl = getApiUrl(info.endpoint);
     info.addSearchParams(apiUrl.searchParams);
     apiUrl.searchParams.set("only", info.timeKey);
     var total = 0;
@@ -403,33 +404,31 @@
         }
         total += 1;
       }
-      if (result.length != 20) {
+      if (result.length != REQUEST_LIMIT) {
         break;
       }
       page += 1;
       apiUrl.searchParams.set("page", `${page}`);
     }
-    console.log(`[danbooru-show-profile-changes] "${info.name}": ${total}`);
     return {
       info,
       value: total
     };
   }
   function initialize() {
-    if (userId === void 0 || userName === void 0 || userName !== $("a.user").text()) {
+    if (userId === void 0 || userName === void 0 || userName !== $("a.user").attr("data-user-name")) {
       return;
     }
-    console.log("[danbooru-show-profile-changes] init");
     GM_addStyle(DSPC_CSS);
     addClassNames();
-    addButton();
+    addClearButton();
     replaceFeedbackLink();
     const date = /* @__PURE__ */ new Date();
     date.setHours(0);
     date.setMinutes(0);
     date.setSeconds(0);
     date.setMilliseconds(0);
-    const now = date.getTime();
+    const midnight = date.getTime();
     const year = date.getFullYear().toString().padStart(4, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const day = date.getDate().toString().padStart(2, "0");
@@ -438,7 +437,7 @@
     const forceUpdate = prevDateKey !== dateKey;
     DSPCStorage.set("date_key", dateKey);
     const fetchers = infos.map(
-      (info) => get(now, forceUpdate, info)
+      (info) => get(midnight, forceUpdate, info)
     );
     Promise.all(fetchers).then((results) => {
       for (const result of results) {
