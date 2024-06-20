@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        danbooru-show-profile-changes
-// @version     0.3.0
+// @version     0.3.1
 // @description Show changes to your Danbooru profile page
 // @author      ddmgy
 // @namespace   ddmgy
@@ -342,7 +342,7 @@
     ];
     const rows = $("table.user-statistics tr");
     for (const { className, selector } of classNames) {
-      const match = rows.find(`a[${encode(selector)}]`);
+      const match = rows.find(`a[${encode(selector)}]:nth-of-type(1)`);
       if (!match.length) {
         continue;
       }

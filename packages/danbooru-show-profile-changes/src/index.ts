@@ -352,7 +352,7 @@ function addClassNames(): void {
   const rows = $("table.user-statistics tr");
 
   for (const { className, selector } of classNames) {
-    const match = rows.find(`a[${encode(selector)}]`);
+    const match = rows.find(`a[${encode(selector)}]:nth-of-type(1)`);
     if (!match.length) { continue; }
     match.parents("tr").addClass(className);
   }
