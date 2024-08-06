@@ -1,19 +1,95 @@
+(() => {
+const DSPC_OPEN_DIALOG_BUTTON = `
+<button id="dspc-open-dialog" title="Open DSPC control dialog" style="margin-left: 1em">DPSC</button>
+`;
+const DSPC_DIALOG = `
+<dialog id="dspc-dialog">
+  <div>
+    <div id="dspc-main">
+      <div id="dspc-intervals-section">
+        <label>
+          Interval(s):
+          <input id="dspc-intervals" type="text" name="intervals" placeholder="1 day" />
+        </label>
+      </div>
+      <div id="dspc-intervals-error">Error text</div>
+      <div>
+        <label>
+          Hide:
+          <select id="dspc-hide-select" name="hide">
+            <option value="none">None</option>
+            <option value="neutral">Neutral</option>
+            <option value="all">All</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <span id="dspc-buttons">
+      <button id="dspc-clear-data" class="ui-button ui-widget ui-corner-all">Clear</button>
+      <div id="dspc-button-spacer"></div>
+      <button id="dspc-close-dialog" class="ui-button ui-widget ui-corner-all">Close</button>
+      <button id="dspc-save-dialog" class="ui-button ui-widget ui-corner-all">Save</button>
+    </span>
+  </div>
+</dialog>
+`;
 const DSPC_CSS = `
+#dspc-dialog {
+  background-color: var(--card-background-color);
+  color: var(--text-color);
+}
+#dspc-main {
+  margin-bottom: 1rem;
+}
+#dspc-intervals-section {
+  margin-bottom: 1rem;
+}
+#dspc-intervals-error {
+  display: none;
+  color: var(--error-color);
+}
+#dspc-buttons {
+  display: flex;
+}
+#dspc-button-spacer {
+  flex: 1;
+}
 .dspc-positive {
   color: var(--green-4);
 }
 .dspc-neutral {
   color: var(--grey-4);
-  display: none;
 }
 .dspc-negative {
   color: var(--red-4);
 }
+.dspc-info {
+  padding-left: 0.25em;
+  vertical-align: middle;
+}
 `;
-const REQUEST_LIMIT: number = 20;
 
-const userId = $("body").attr("data-current-user-id");
-const userName = $("body").attr("data-current-user-name");
+const REQUEST_LIMIT: number = 20;
+const INTERVALS_RE = /(\d+)\s*(day|week|month)s?/;
+const DEFAULT_INTERVAL: string = "1 day";
+const MILLISECONDS_PER = {
+  day: 86_400_000,
+  week: 604_800_000, // 7 days
+  month: 2_678_400_000, // 31 days
+};
+const DEFAULT_HIDE: string = "none";
+const CENTER_DOT: string = "·";
+
+const userName = document.body.getAttribute("data-current-user-name");
+const userId = document.body.getAttribute("data-current-user-id");
+
+function log(msg: any) {
+  console.log(`[danbooru-show-profile-changes] ${msg}`);
+}
+
+function error(msg: any) {
+  console.error(`[danbooru-show-profiles-changes] ${msg}`);
+}
 
 function __getKey(key: string): string {
   return `dspc-${key}`;
@@ -43,72 +119,55 @@ class DSPCStorage {
   }
 }
 
-function __makeSup(value: number, title?: string): string {
+class Intervals {
+  static parse(input: string): number {
+    const match = INTERVALS_RE.exec(input)!;
+    const scalar = +match[1];
+    const key = match[2] as (keyof typeof MILLISECONDS_PER);
+    return scalar * MILLISECONDS_PER[key];
+  }
+}
+
+function __makeSup(value: number, title?: string): HTMLElement {
   const clazz = value === 0 ? "neutral" : (value > 0 ? "positive" : "negative");
-  return `
-    <sup class="dspc-${clazz}" title="${title === undefined ? "" : title}">
-      ${value}
-    </sup>
-  `;
+  const el = document.createElement("sup");
+  el.classList.add(`dspc-${clazz}`);
+  if (title) el.title = title;
+  el.innerText = value.toString();
+  return el;
 }
-
-function __userLevelToNumber(userLevel: string): number {
-  switch (userLevel) {
-    case "Member":
-      return 20;
-    case "Gold":
-      return 30;
-    case "Platinum":
-      return 31;
-    case "Builder":
-      return 32;
-    case "Contributor":
-      return 35;
-    case "Approver":
-      return 37;
-    case "Moderator":
-      return 40;
-    case "Admin":
-      return 50;
-    case "Owner":
-      return 60;
-  };
-
-  return 10; // Default: Restricted
-}
-
-type AddSearchParams = (params: URLSearchParams) => void;
 
 type Info = {
   name: string,
   endpoint: string,
   selector: string,
   timeKey: string,
-  addSearchParams: AddSearchParams,
+  options?: { [index: string]: any },
 };
 
 type GetResult = {
   info: Info,
-  value: number,
+  values: number[],
+};
+
+type Interval = {
+  name: string,
+  timestamp: number,
+};
+
+type DialogResult = {
+  intervals: string,
+  hide: string,
 };
 
 const infos: Info[] = [
-  {
-    name: "upload_limit_pending",
-    endpoint: "posts",
-    selector: "tr.user-upload-limit a:nth-of-type(1)",
-    timeKey: "created_at",
-    addSearchParams: (params) => {
-      params.set("tags", `user:${userName}+status:pending`);
-    },
-  },
   {
     name: "uploads",
     endpoint: "posts",
     selector: "tr.user-uploads a:nth-of-type(1)",
     timeKey: "created_at",
-    addSearchParams: (params) => {
-      params.set("tags", `user:${userName}`);
+    options: {
+      "tags": `user:${userName}`,
     },
   },
   {
@@ -116,8 +175,8 @@ const infos: Info[] = [
     endpoint: "posts",
     selector: "tr.user-deleted-uploads a",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("tags", `user:${userName}+status:deleted`);
+    options : {
+      "tags": `user:${userName}+status:deleted`,
     },
   },
   {
@@ -125,8 +184,8 @@ const infos: Info[] = [
     endpoint: "posts",
     selector: "tr.user-favorites a:nth-of-type(1)",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("tags", `ordfav:${userName}`);
+    options : {
+      "tags": `ordfav:${userName}`,
     },
   },
   {
@@ -134,8 +193,8 @@ const infos: Info[] = [
     endpoint: "post_votes",
     selector: "tr.user-votes a:nth-of-type(1)",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("search[user_id]", `${userId}`);
+    options : {
+      "search[user_id]": `${userId}`,
     }
   },
   {
@@ -143,8 +202,8 @@ const infos: Info[] = [
     endpoint: "comment_votes",
     selector: "tr.user-votes a:nth-of-type(2)",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("search[user_id]", `${userId}`);
+    options : {
+      "search[user_id]": `${userId}`,
     },
   },
   {
@@ -152,8 +211,8 @@ const infos: Info[] = [
     endpoint: "forum_post_votes",
     selector: "tr.user-votes a:nth-of-type(3)",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("search[creator_id]", `${userId}`);
+    options : {
+      "search[creator_id]": `${userId}`,
     },
   },
   {
@@ -161,8 +220,8 @@ const infos: Info[] = [
     endpoint: "favorite_groups",
     selector: "tr.user-favorite-groups a",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("search[creator_id]", `${userId}`);
+    options : {
+      "search[creator_id]": `${userId}`,
     },
   },
   {
@@ -170,8 +229,8 @@ const infos: Info[] = [
     endpoint: "post_versions",
     selector: "tr.user-post-changes a:nth-of-type(1)",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("search[updater_id]", `${userId}`);
+    options : {
+      "search[updater_id]": `${userId}`,
     },
   },
   {
@@ -179,8 +238,8 @@ const infos: Info[] = [
     endpoint: "note_versions",
     selector: "tr.user-note-changes a:nth-of-type(1)",
     timeKey: "created_at",
-    addSearchParams: (params) => {
-      params.set("search[updater_id]", `${userId}`);
+    options : {
+      "search[updater_id]": `${userId}`,
     },
   },
   {
@@ -188,8 +247,8 @@ const infos: Info[] = [
     endpoint: "posts",
     selector: "tr.user-note-changes a:nth-of-type(2)",
     timeKey: "last_noted_at",
-    addSearchParams: (params) => {
-      params.set("tags", `noteupdated:${userName}+order:note`);
+    options : {
+      "tags": `noteupdated:${userName}+order:note`,
     },
   },
   {
@@ -197,8 +256,8 @@ const infos: Info[] = [
     endpoint: "wiki_page_versions",
     selector: "tr.user-wiki-page-changes a",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("search[updater_id]", `${userId}`);
+    options : {
+      "search[updater_id]": `${userId}`,
     },
   },
   {
@@ -206,8 +265,8 @@ const infos: Info[] = [
     endpoint: "artist_versions",
     selector: "tr.user-artist-changes a",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("search[updater_id]", `${userId}`);
+    options : {
+      "search[updater_id]": `${userId}`,
     },
   },
   {
@@ -215,8 +274,8 @@ const infos: Info[] = [
     endpoint: "artist_commentary_versions",
     selector: "tr.user-commentary-changes a",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("search[updater_id]", `${userId}`);
+    options : {
+      "search[updater_id]": `${userId}`,
     },
   },
   {
@@ -224,8 +283,8 @@ const infos: Info[] = [
     endpoint: "pool_versions",
     selector: "tr.user-pool-changes a",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("search[updater_id]", `${userId}`);
+    options : {
+      "search[updater_id]": `${userId}`,
     },
   },
   {
@@ -233,8 +292,8 @@ const infos: Info[] = [
     endpoint: "forum_posts",
     selector: "tr.user-forum-posts a",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("search[creator_id]", `${userId}`);
+    options : {
+      "search[creator_id]": `${userId}`,
     },
   },
   {
@@ -242,8 +301,8 @@ const infos: Info[] = [
     endpoint: "posts",
     selector: "tr.user-approvals a",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("tags", `approver:${userName}`);
+    options : {
+      "tags": `approver:${userName}`,
     },
   },
   {
@@ -251,9 +310,9 @@ const infos: Info[] = [
     endpoint: "comments",
     selector: "tr.user-comments a:nth-of-type(1)",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("group_by", "comment");
-      params.set("search[creator_id]", `${userId}`);
+    options : {
+      "group_by": "comment",
+      "search[creator_id]": `${userId}`,
     },
   },
   {
@@ -261,8 +320,8 @@ const infos: Info[] = [
     endpoint: "posts",
     selector: "tr.user-comments a:nth-of-type(2)",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("tags", `commenter:${userName}+order:comment_bumped`);
+    options : {
+      "tags": `commenter:${userName}+order:comment_bumped`,
     },
   },
   {
@@ -270,8 +329,8 @@ const infos: Info[] = [
     endpoint: "post_appeals",
     selector: "tr.user-appeals a",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("search[creator_id]", `${userId}`);
+    options : {
+      "search[creator_id]": `${userId}`,
     },
   },
   {
@@ -279,8 +338,8 @@ const infos: Info[] = [
     endpoint: "post_flags",
     selector: "tr.user-flags a",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("search[creator_id]", `${userId}`);
+    options : {
+      "search[creator_id]": `${userId}`,
     },
   },
   {
@@ -288,9 +347,9 @@ const infos: Info[] = [
     endpoint: "user_feedbacks",
     selector: "tr.user-feedback a:nth-of-type(2)",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("search[user_id]", `${userId}`);
-      params.set("search[category]", "positive");
+    options : {
+      "search[user_id]": `${userId}`,
+      "search[category]": "positive",
     },
   },
   {
@@ -298,9 +357,9 @@ const infos: Info[] = [
     endpoint: "user_feedbacks",
     selector: "tr.user-feedback a:nth-of-type(3)",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("search[user_id]", `${userId}`);
-      params.set("search[category]", "neutral");
+    options : {
+      "search[user_id]": `${userId}`,
+      "search[category]": "neutral",
     },
   },
   {
@@ -308,9 +367,9 @@ const infos: Info[] = [
     endpoint: "user_feedbacks",
     selector: "tr.user-feedback a:nth-of-type(4)",
     timeKey: "updated_at",
-    addSearchParams: (params) => {
-      params.set("search[user_id]", `${userId}`);
-      params.set("search[category]", "negative");
+    options : {
+      "search[user_id]": `${userId}`,
+      "search[category]": "negative",
     },
   },
 ];
@@ -323,90 +382,50 @@ function getApiUrl(endpoint: string): URL {
   return url;
 }
 
-function addClassNames(): void {
-  const encode = (path: string) => path.replace(/:/g, "%3A");
-
-  const classNames = [
-    { className: "user-level", selector: `href^="/upgrade"` },
-    { className: "user-upload-limit", selector: `href*="status:pending"` },
-    { className: "user-uploads", selector: `href="/posts?tags=user:${userName}"` },
-    { className: "user-deleted-uploads", selector: `href*="status:deleted"` },
-    { className: "user-favorites", selector: `href*="ordfav:${userName}"` },
-    { className: "user-votes", selector: `href^="/post_votes"` },
-    { className: "user-favorite-groups", selector: `href^="/favorite_groups"` },
-    { className: "user-post-changes", selector: `href^="/post_versions"` },
-    { className: "user-note-changes", selector: `href^="/note_versions"` },
-    { className: "user-wiki-page-changes", selector: `href^="/wiki_page_versions"` },
-    { className: "user-artist-changes", selector: `href^="/artist_versions"` },
-    { className: "user-commentary-changes", selector: `href^="/artist_commentary_versions"` },
-    { className: "user-pool-changes", selector: `href^="/pool_versions"` },
-    { className: "user-forum-posts", selector: `href^="/forum_posts"` },
-    { className: "user-approvals", selector: `href*="tags=approver:${userName}"` },
-    { className: "user-comments", selector: `href^="/comments"` },
-    { className: "user-appeals", selector: `href^="/post_appeals"` },
-    { className: "user-flags", selector: `href^="/post_flags"` },
-    { className: "user-feedback", selector: `href^="/user_feedbacks"` },
-    { className: "user-saved-searches", selector: `href*="search:"` },
-    { className: "user-api-key", selector: `href="/users/${userId}/api_keys"` },
-  ];
-  const rows = $("table.user-statistics tr");
-
-  for (const { className, selector } of classNames) {
-    const match = rows.find(`a[${encode(selector)}]:nth-of-type(1)`);
-    if (!match.length) { continue; }
-    match.parents("tr").addClass(className);
-  }
-}
-
-function addClearButton(): void {
-  $("table.user-statistics").parent().after(`
-    <br />
-    <div class="dspc-clear-data">
-      <button id="dspc-clear-button">Reset danbooru-show-profile-changes stored data</button>
-    </div>
-  `);
-
-  $("#dspc-clear-button").on("click", () => {
-    // @ts-ignore-
-    Danbooru.notice("Clearing danbooru-show-profile-changes stored data");
-    console.log("[danbooru-show-profile-changes] clearing stored values");
-    DSPCStorage.clear();
-  });
-}
-
 function replaceFeedbackLink(): void {
-  const all = $("tr.user-feedback a").clone();
-  const replacement = $("<div></div>");
-  const match = /positive:(\d+)\s+neutral:(\d+)\s+negative:(\d+)/.exec(all.text());
+  const all = document.querySelector("tr.user-feedback a")!.cloneNode(true) as HTMLElement;
+  const match = /positive:(\d+)\s+neutral:(\d+)\s+negative:(\d+)/.exec(all.innerText);
   if (match === null) {
     return;
   }
 
-  replacement.append(all.text("all "));
-  replacement.append(`<a href="${all.attr("href")}&search[category]=positive">positive:${+match[1]} </a>`);
-  replacement.append(`<a href="${all.attr("href")}&search[category]=neutral">neutral:${+match[2]} </a>`);
-  replacement.append(`<a href="${all.attr("href")}&search[category]=negative">negative:${+match[3]} </a>`);
+  const href = all.getAttribute("href");
+  all.innerText = "all"
 
-  $("tr.user-feedback a").replaceWith(replacement);
+  const replacement = document.createElement("div");
+  replacement.append(all);
+  replacement.insertAdjacentHTML("beforeend", `<a href="${href}&search[category]=positive"> positive:${match[1]}</a>`);
+  replacement.insertAdjacentHTML("beforeend", `<a href="${href}&search[category]=neutral"> neutral:${match[2]}</a>`);
+  replacement.insertAdjacentHTML("beforeend", `<a href="${href}&search[category]=negative"> negative:${match[3]}</a>`);
+
+  document.querySelector("tr.user-feedback a")!.replaceWith(replacement);
 }
 
 async function get(
-  timestamp: number,
+  intervals: Interval[],
   forceUpdate: boolean,
   info: Info,
 ): Promise<GetResult> {
-  const stored = DSPCStorage.get<number>(info.name);
+  const stored = DSPCStorage.get<string>(info.name);
   if (!forceUpdate && stored !== undefined) {
     return {
       info,
-      value: stored,
+      values: stored.split(CENTER_DOT).map((s) => +s),
     };
   }
 
   const apiUrl = getApiUrl(info.endpoint);
-  info.addSearchParams(apiUrl.searchParams);
+  if (info.options) {
+    for (const [ key, value ] of Object.entries(info.options)) {
+      apiUrl.searchParams.set(key, value.toString());
+    }
+  }
   apiUrl.searchParams.set("only", info.timeKey);
-  var total: number = 0;
+  const count = intervals.length;
+  const totals: number[] = [];
+  for (var i = 0; i < count; i++) {
+    totals.push(0);
+  }
   var page: number = 1;
 
   outer: while (true) {
@@ -422,11 +441,15 @@ async function get(
 
     for (const res of result) {
       const updated = Date.parse(res[info.timeKey].substring(0, 16));
-      if (updated < timestamp) {
-        break outer;
+      var anyUpdated: boolean = false;
+      for (var i = 0; i < count; i++) {
+        if (updated >= intervals[i].timestamp) {
+          totals[i] += 1;
+          anyUpdated = true;
+        }
       }
 
-      total += 1;
+      if (!anyUpdated) { break outer; }
     }
 
     if (result.length != REQUEST_LIMIT) {
@@ -439,18 +462,162 @@ async function get(
 
   return {
     info,
-    value: total,
+    values: totals,
   };
 }
 
-function initialize() {
-  if (userId === undefined || userName === undefined || userName !== $("a.user").attr("data-user-name")) {
+function addClassNames(): void {
+  const classNames = [
+    { className: "user-id", regex: /^User ID$/ },
+    { className: "user-join-date", regex: /^Join Date$/ },
+    { className: "user-level", regex: /^Level$/ },
+    { className: "user-upload-limit", regex: /^Upload Limit$/ },
+    { className: "user-uploads", regex: /^Uploads$/ },
+    { className: "user-deleted-uploads", regex: /^Deleted Uploads$/ },
+    { className: "user-favorites", regex: /^Favorites$/ },
+    { className: "user-votes", regex: /^Votes$/ },
+    { className: "user-favorite-groups", regex: /^Favorite Groups$/ },
+    { className: "user-post-changes", regex: /^Post Changes$/ },
+    { className: "user-note-changes", regex: /^Note Changes$/ },
+    { className: "user-wiki-page-changes", regex: /^Wiki Page Changes$/ },
+    { className: "user-artist-changes", regex: /^Artist Changes$/ },
+    { className: "user-commentary-changes", regex: /^Commentary Changes$/ },
+    { className: "user-pool-changes", regex: /^Pool Changes$/ },
+    { className: "user-forum-posts", regex: /^Forum Posts$/ },
+    { className: "user-approvals", regex: /^Approvals$/ },
+    { className: "user-comments", regex: /^Comments$/ },
+    { className: "user-appeals", regex: /^Appeals$/ },
+    { className: "user-flags", regex: /^Flags$/ },
+    { className: "user-feedback", regex: /^Feedback$/ },
+    { className: "user-saved-searches", regex: /^Saved Searches$/ },
+    { className: "user-api-key", regex: /^API Key$/ },
+  ];
+  const rows = Array.from(document.querySelectorAll("table.user-statistics tr"));
+
+  for (const { className, regex } of classNames) {
+    const index = rows.findIndex((element) => regex.test((element.firstElementChild! as HTMLElement).innerText));
+    if (index === -1) { continue; }
+    rows[index].classList.add(className);
+    rows.splice(index, 1);
+  }
+}
+
+async function openDialog(): Promise<DialogResult> {
+  return new Promise((resolve, reject) => {
+    if (!document.querySelector("#dspc-dialog")) {
+      document.body.insertAdjacentHTML("beforeend", DSPC_DIALOG);
+    }
+
+    const dspcDialog = document.querySelector("#dspc-dialog")! as HTMLDialogElement;
+
+    const clearDataButton = document.querySelector("#dspc-clear-data")! as HTMLButtonElement;
+    const closeDialogButton = document.querySelector("#dspc-close-dialog")! as HTMLButtonElement;
+    const saveDialogButton = document.querySelector("#dspc-save-dialog")! as HTMLButtonElement;
+    const intervalsInput = document.querySelector("#dspc-intervals")! as HTMLInputElement;
+    const intervalsError = document.querySelector("#dspc-intervals-error")! as HTMLDivElement;
+    const hideSelect = document.querySelector("#dspc-hide-select")! as HTMLSelectElement;
+
+    intervalsInput.value = DSPCStorage.get<string>("intervals", DEFAULT_INTERVAL)!;
+    hideSelect.value = DSPCStorage.get<string>("hide", DEFAULT_HIDE)!;
+
+    intervalsInput.addEventListener("keyup", (event) => {
+      const currentValues = intervalsInput.value.trim().split(/\s*,\s*/);
+      const allValid = currentValues.every((value) => INTERVALS_RE.test(value));
+      if (allValid) {
+        intervalsError.style.display = "none";
+        saveDialogButton.disabled = false;
+      } else {
+        intervalsError.style.display = "block";
+        intervalsError.innerText = "Invalid interval(s)";
+        saveDialogButton.disabled = true;
+        return;
+      }
+
+      if (currentValues.length > 3) {
+        intervalsError.style.display = "block";
+        intervalsError.innerText = "Max of 3 intervals allowed";
+        saveDialogButton.disabled = true;
+      }
+
+      const intervals = currentValues.map((value) => {
+        return Intervals.parse(value);
+      }).sort();
+      const allLessThanOneMonth = intervals.every((interval) => interval <= MILLISECONDS_PER.month);
+      if (!allLessThanOneMonth) {
+        intervalsError.style.display = "block";
+        intervalsError.innerText = "No interval may be longer than 1 month";
+        saveDialogButton.disabled = true;
+        return;
+      }
+    });
+
+    clearDataButton.addEventListener("click", () => {
+      // @ts-ignore-
+      Danbooru.notice("Clearing danbooru-show-profile-changes stored data");
+      log("clearing stored values");
+      DSPCStorage.clear();
+    });
+    closeDialogButton.addEventListener("click", () => {
+      dspcDialog.close();
+      reject("nothing to see here");
+    });
+    saveDialogButton.addEventListener("click", () => {
+      dspcDialog.close();
+      resolve({ intervals: intervalsInput.value.trim().split(/\s*,\s*/).join(", "), hide: hideSelect.value });
+    });
+
+    dspcDialog.showModal();
+  });
+}
+
+function hideElements(hide: string): void {
+  const changeEm = (selector: string, visibility: string) => {
+    const elements = document.querySelectorAll(selector);
+    for (const element of elements) {
+      (element as HTMLElement).style.display = visibility;
+    }
+  };
+  const hideEm = (selector: string) => {
+    changeEm(selector, "none");
+  };
+  const showEm = (selector: string) => {
+    changeEm(selector, "inline");
+  };
+  if (hide === "all") {
+    hideEm("span.dspc-info, sup.dspc-positive, sup.dspc-neutral, sup.dspc-negative");
+  } else if (hide === "neutral") {
+    showEm("span.dspc-info, sup.dspc-positive, sup.dspc-neutral, sup.dspc-negative");
+    hideEm("sup.dspc-neutral");
+  } else if (hide === "none") {
+    showEm("span.dspc-info, sup.dspc-positive, sup.dspc-neutral, sup.dspc-negative");
+  }
+}
+
+function addButton(): void {
+  document.querySelector("a.user")?.insertAdjacentHTML("afterend", DSPC_OPEN_DIALOG_BUTTON);
+  document.querySelector("#dspc-open-dialog")?.addEventListener("click", (event) => {
+    openDialog().then(
+      (result) => {
+        if (result.intervals !== DSPCStorage.get<string>("intervals", DEFAULT_INTERVAL)!) {
+          DSPCStorage.clear();
+        }
+        DSPCStorage.set<string>("intervals", result.intervals);
+        DSPCStorage.set<string>("hide", result.hide);
+        hideElements(result.hide);
+      },
+      (reason) => {},
+    );
+  });
+}
+
+function initialize(): void {
+  if (userId === undefined || userName === undefined || userName !== document.querySelector("a.user")?.getAttribute("data-user-name")) {
     return;
   }
 
   GM_addStyle(DSPC_CSS);
   addClassNames();
-  addClearButton();
+  addButton();
   replaceFeedbackLink();
 
   // Create a date object at midnight, current day
@@ -471,45 +638,55 @@ function initialize() {
 
   DSPCStorage.set("date_key", dateKey);
 
+  const intervals = DSPCStorage.get<string>("intervals")!
+    .split(/\s*,\s*/g)
+    .map((value) => { return { name: value, timestamp: midnight - Intervals.parse(value) + MILLISECONDS_PER.day }; })
+    .sort((a, b) => b.timestamp - a.timestamp);
+
   const fetchers: Promise<GetResult>[] = infos.map(
-    (info) => get(midnight, forceUpdate, info),
+    (info) => get(intervals, forceUpdate, info),
   );
 
   Promise.all(fetchers).then((results) => {
     for (const result of results) {
-      const element = $(result.info.selector);
-      if (element.length === 0) {
-        continue;
-      }
+      const element = document.querySelector(result.info.selector) as HTMLElement;
+      if (!element) { continue; }
 
-      const match = /(\d+)/.exec(element.text());
+      const match = /(\d+)/.exec(element.innerText);
       if (match === null) {
         continue;
       }
 
-      const stored = DSPCStorage.get<number>(result.info.name);
+      const stored = DSPCStorage.get<string>(result.info.name)?.split(CENTER_DOT).map((value) => +value);
       const current = +match[1];
-      const beforeMidnight = (stored === undefined || forceUpdate)
-        ? (current - result.value)
-        : stored;
+      const before = result.values.map((value, i) => {
+        return (stored === undefined || forceUpdate)
+          ? (current - value)
+          : stored[i];
+      });
 
-      $(element).after(__makeSup(current - beforeMidnight, `${beforeMidnight}`))
+      const sups = before.map((value, i) => __makeSup(current - value, `${intervals[i].name}: ${value}`));
+      const span = document.createElement("span");
+      span.classList.add("dspc-info");
 
-      DSPCStorage.set(result.info.name, beforeMidnight);
+      const spanChildren: HTMLElement[] = [];
+      sups.forEach((sup, i) => {
+        if (i > 0) {
+          const dot = document.createElement("sup");
+          dot.classList.add(spanChildren[i - 1].className);
+          dot.innerText = CENTER_DOT;
+          spanChildren.push(dot);
+        }
+        spanChildren.push(sup);
+      });
+      span.append(...spanChildren);
+
+      element.insertAdjacentElement("afterend", span);
+
+      DSPCStorage.set(result.info.name, before.join(CENTER_DOT));
     }
-  });
-
-  const currLevel = $("body").attr("data-current-user-level-string");
-  if (currLevel !== undefined) {
-    const prevLevel = DSPCStorage.get<string>("user_level");
-    if (prevLevel !== undefined) {
-      $("tr.user-level td").replaceWith(`<td>${currLevel} ${__makeSup(__userLevelToNumber(currLevel) - __userLevelToNumber(prevLevel), prevLevel)}</td>`);
-    } else {
-      $("tr.user-level td").replaceWith(`<td>${currLevel}</td>`);
-    }
-
-    DSPCStorage.set<string>("user_level", currLevel);
-  }
+  }).then(() => hideElements(DSPCStorage.get<string>("hide", DEFAULT_HIDE)!));
 }
 
-$(initialize);
+initialize();
+})();
