@@ -55,7 +55,8 @@ async function buildMain() {
           .replace(/APP_NAME/g, `${pkg.name} (minified)`),
       },
       outfile: `dist/${minifiedFilename}`,
-      minify: true,
+      minifySyntax: true,
+      minifyIdentifiers: false,
     });
   }
 }

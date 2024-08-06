@@ -1,4 +1,3 @@
-(() => {
 const DSPC_OPEN_DIALOG_BUTTON = `
 <button id="dspc-open-dialog" title="Open DSPC control dialog" style="margin-left: 1em">DPSC</button>
 `;
@@ -689,4 +688,3 @@ function initialize(): void {
 }
 
 initialize();
-})();
