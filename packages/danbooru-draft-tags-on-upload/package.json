@@ -1,0 +1,18 @@
+{
+  "name": "danbooru-draft-tags-on-upload",
+  "version": "0.3.0",
+  "author": "ddmgy",
+  "description": "Add ability to save/load drafts on upload page",
+  "license": "MIT",
+  "scripts": {
+    "build": "node ../common/build.js build",
+    "dev": "node ../common/build.js dev",
+    "clean": "rm -rf dist"
+  },
+  "private": true,
+  "devDependencies": {
+    "@types/tampermonkey": "^5.0.3",
+    "esbuild": "^0.23.0",
+    "typescript": "^5.5.4"
+  }
+}

@@ -1,16 +1,33 @@
 ### Danbooru
+* [Draft Tags on Upload](#danbooru---draft-tags-on-upload)
+* [Nickname Manager](#danbooru---nickname-manager)
 * [Page Selector](#danbooru---page-selector)
 * [Panzoom on Posts](#danbooru---panzoom-on-posts)
 * [Rain Effects](#danbooru---rain-effect)
 * [Show Profile Changes](#danbooru---show-profile-changes)
 * [Show Tag Counts](#danbooru---show-tag-counts)
 * [Sort Tags](#danbooru---sort-tags)
-* [Upload Save Tags](#danbooru---upload-save-tags)
 
 ### Installation
 
 - Install a userscript manager (Tampermonkey, Greasemonkey, Firemonkey, etc.)
 - Click the "Install" / "Minified" link below the script you want to install
+
+## Danbooru - Draft Tags on Upload
+
+[Install](https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-draft-tags-on-upload/dist/danbooru-draft-tags-on-upload.user.js?raw=true)
+
+[Minified](https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-draft-tags-on-upload/dist/danbooru-draft-tags-on-upload.min.user.js?raw=true)
+
+Save/load drafts on upload page. Information is deleted when loading a post for a given media asset, or after a configurable amount of time (default: 1 week).
+
+## Danbooru - Nickname Manager
+
+[Install](https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-nickname-manager/dist/danbooru-nickname-manager.user.js?raw=true)
+
+[Minified](https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-nickname-manager/dist/danbooru-nickname-manager.min.user.js?raw=true)
+
+Adds ability to change displayed name of Danbooru user links. Links can also be styled.
 
 ## Danbooru - Page Selector
 
@@ -67,11 +84,3 @@ Show tag counts on Danbooru posts.
 Sort tag lists by name or post count.
 
 ![An example of the tag sorting](images/danbooru-sort-tags.gif)
-
-## Danbooru - Upload Save Tags
-
-[Install](https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-upload-save-tags/dist/danbooru-upload-save-tags.user.js?raw=true)
-
-[Minified](https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-upload-save-tags/dist/danbooru-upload-save-tags.min.user.js?raw=true)
-
-Save/load information on upload page. Information is deleted when loading a post for a given media asset, or after 5 days.
