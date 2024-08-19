@@ -1,6 +1,5 @@
 ### Danbooru
 * [Draft Tags on Upload](#danbooru---draft-tags-on-upload)
-* [Nickname Manager](#danbooru---nickname-manager)
 * [Page Selector](#danbooru---page-selector)
 * [Panzoom on Posts](#danbooru---panzoom-on-posts)
 * [Rain Effects](#danbooru---rain-effect)
@@ -20,14 +19,6 @@
 [Minified](https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-draft-tags-on-upload/dist/danbooru-draft-tags-on-upload.min.user.js?raw=true)
 
 Save/load drafts on upload page. Information is deleted when loading a post for a given media asset, or after a configurable amount of time (default: 1 week).
-
-## Danbooru - Nickname Manager
-
-[Install](https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-nickname-manager/dist/danbooru-nickname-manager.user.js?raw=true)
-
-[Minified](https://github.com/ddmgy/userscripts/blob/master/packages/danbooru-nickname-manager/dist/danbooru-nickname-manager.min.user.js?raw=true)
-
-Adds ability to change displayed name of Danbooru user links. Links can also be styled.
 
 ## Danbooru - Page Selector
 
