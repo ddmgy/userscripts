@@ -1,58 +1,33 @@
-const DSTC_CSS = `
-.dstc-post-count {
-  font-weight: normal;
-  color: var(--tag-count-color);
-}
-`;
-
-type AddTagCountOptions = {
-  headerSelector: string;
-  tagSelector: string;
-};
-
-function addTagCount({ headerSelector, tagSelector }: AddTagCountOptions): void {
-  const original = $(`h3.${headerSelector}-tag-list`);
-  if (original.length === 0) {
-    console.log(`[danbooru-show-tag-counts] h3.${headerSelector}-tag-list does not exist, skipping`);
+function addTagCount(headerSelector: string): void {
+  const header = document.querySelector(`h3.${headerSelector}-tag-list`);
+  if (!header) {
     return;
   }
 
-  $(original).append($("<span></span>", {
-    "class": "dstc-post-count",
-    "text": $(`.tag-type-${tagSelector}`).length,
-  }));
+  const count = header.nextElementSibling?.querySelectorAll(".search-tag").length;
+  if (!count) {
+    return;
+  }
+  console.log(count);
+
+  header.insertAdjacentHTML(
+    "beforeend",
+    `<span class="post-count" style="font-weight: normal;">${count}</span>`,
+  );
 }
 
 function initialize(): void {
-  $(".dstc-post-count").remove();
-
-  const tagTypes: AddTagCountOptions[] = [
-    {
-      headerSelector: "artist",
-      tagSelector: "1",
-    },
-    {
-      headerSelector: "copyright",
-      tagSelector: "3",
-    },
-    {
-      headerSelector: "character",
-      tagSelector: "4",
-    },
-    {
-      headerSelector: "general",
-      tagSelector: "0",
-    },
-    {
-      headerSelector: "meta",
-      tagSelector: "5",
-    },
+  const headerSelectors: string[] = [
+    "artist",
+    "copyright",
+    "character",
+    "general",
+    "meta",
   ];
 
-  for (const tagType of tagTypes) {
-    addTagCount(tagType);
+  for (const headerSelector of headerSelectors) {
+    addTagCount(headerSelector);
   }
 }
 
-GM_addStyle(DSTC_CSS);
-$(initialize);
+initialize();
