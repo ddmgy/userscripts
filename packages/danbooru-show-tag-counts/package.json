@@ -1,6 +1,6 @@
 {
   "name": "danbooru-show-tag-counts",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "ddmgy",
   "description": "Show tag counts on Danbooru posts",
   "license": "MIT",

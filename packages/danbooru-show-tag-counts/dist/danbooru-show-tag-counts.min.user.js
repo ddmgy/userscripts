@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        danbooru-show-tag-counts (minified)
-// @version     0.2.0
+// @version     0.2.1
 // @description Show tag counts on Danbooru posts
 // @author      ddmgy
 // @namespace   ddmgy
@@ -20,10 +20,10 @@
     if (!header)
       return;
     let count = header.nextElementSibling?.querySelectorAll(".search-tag").length;
-    count && (console.log(count), header.insertAdjacentHTML(
+    count && header.insertAdjacentHTML(
       "beforeend",
       `<span class="post-count" style="font-weight: normal;">${count}</span>`
-    ));
+    );
   }
   function initialize() {
     let headerSelectors = [

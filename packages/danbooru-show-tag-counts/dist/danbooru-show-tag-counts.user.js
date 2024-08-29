@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        danbooru-show-tag-counts
-// @version     0.2.0
+// @version     0.2.1
 // @description Show tag counts on Danbooru posts
 // @author      ddmgy
 // @namespace   ddmgy
@@ -24,7 +24,6 @@
     if (!count) {
       return;
     }
-    console.log(count);
     header.insertAdjacentHTML(
       "beforeend",
       `<span class="post-count" style="font-weight: normal;">${count}</span>`

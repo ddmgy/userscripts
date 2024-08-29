@@ -8,7 +8,6 @@ function addTagCount(headerSelector: string): void {
   if (!count) {
     return;
   }
-  console.log(count);
 
   header.insertAdjacentHTML(
     "beforeend",
